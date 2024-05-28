@@ -1,0 +1,7 @@
+/integration_oidc/build/
+/integration_oidc/js/
+/integration_oidc/.*.sw*
+/integration_oidc/node_modules/
+/integration_oidc/vendor/
+/integration_oidc/.php-cs-fixer.cache
+/integration_oidc/tests/.phpunit*
