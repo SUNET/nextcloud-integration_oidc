@@ -23,6 +23,8 @@
   </dependencies>
   <settings>
     <admin>OCA\IOIDC\Settings\AdminSettings</admin>
+    <admin-section>OCA\IOIDC\Settings\AdminSection</admin-section>
     <personal>OCA\IOIDC\Settings\PersonalSettings</personal>
+    <personal-section>OCA\IOIDC\Settings\PersonalSection</personal-section>
   </settings>
 </info>

@@ -12,5 +12,9 @@ class Application extends App {
 
 	public function __construct() {
 		parent::__construct(self::APP_ID);
+  }
+  public function register(IRegistrationContext $context): void {
+  }
+  public function boot(IBootContext $context): void {
 	}
 }
