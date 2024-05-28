@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+  <!--
+    SPDX-FileCopyrightText: Mikael Nordin <kano@sunet.se>
+    SPDX-License-Identifier: CC0-1.0
+    -->
+  <id>integration_oidc</id>
+  <name>OIDC connector</name>
+  <summary>Generic OIDC connector for Nextcloud</summary>
+  <description>
+    <![CDATA[Generic OIDC connector for Nextcloud]]>
+  </description>
+  <version>0.1.0</version>
+  <licence>agpl</licence>
+  <author mail="kano@sunet.se" homepage="https://github.com/SUNET/nextcloud-integration_oidc">Mikael Nordin</author>
+  <namespace>IOIDC</namespace>
+  <category>integration</category>
+  <bugs>https://github.com/SUNET/nextcloud-integration_oidc/issues</bugs>
+  <dependencies>
+    <nextcloud min-version="28" max-version="28" />
+  </dependencies>
+  <settings>
+    <admin>OCA\IOIDC\Panels\AdminPanel</admin>
+    <personal>OCA\IOIDC\Panels\PersonalPanel</personal>
+  </settings>
+</info>
