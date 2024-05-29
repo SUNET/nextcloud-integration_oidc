@@ -16,23 +16,35 @@ class ApiController extends Controller
     parent::__construct($appName, $request);
   }
   /**
-   * @NoAdminRequired
+   * @NoCSRFRequired
+   *
+   * @return DataResponse
+   **/
+  public function query()
+  {
+    $response = array(
+      array("name" => "Test", "client_id" => "tEsT", "client_secret" => "TeSt", "token_endpoint" => "https://accounts.google.com/o/oauth2/v2/auth")
+    );
+    return new DataResponse($response, Http::STATUS_OK);
+  }
+  /**
    * @NoCSRFRequired
    *
    * @return DataResponse
    **/
   public function register()
   {
-    return new DataResponse('', Http::STATUS_OK);
+    $params = $this->request->getParams();
+    return new DataResponse(['status' => "success"], Http::STATUS_OK);
   }
   /**
-   * @NoAdminRequired
    * @NoCSRFRequired
    *
    * @return DataResponse
    **/
   public function remove()
   {
-    return new DataResponse('', Http::STATUS_OK);
+    $params = $this->request->getParams();
+    return new DataResponse(['status' => "success"], Http::STATUS_OK);
   }
 }
