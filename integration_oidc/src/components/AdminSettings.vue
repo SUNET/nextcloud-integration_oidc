@@ -3,34 +3,32 @@
     <div id="ioidc-content">
       <NcSettingsSection name="Integration OIDC" description="Generic OIDC integration engine."
         doc-url="https://github.com/SUNET/nextcloud-integration_oidc" @default="populate">
-        <form id="ioidc-form" >
-          <div class="external-label">
-            <label for="Name">Name</label>
-            <NcTextField id="Name" :value.sync="name" :label-outside="true" placeholder="Name" @update:value="check" />
-          </div>
-          <div class="external-label">
-            <label for="TokenEndpoint">Token Endpoint</label>
-            <NcTextField id="TokenEndpoint" :value.sync="token_endpoint" :label-outside="true"
-              placeholder="Token Endpoint" @update:value="check" />
-          </div>
-          <div class="external-label">
-            <label for="ClientID">Client ID</label>
-            <NcPasswordField id="ClientID" :value.sync="client_id" :label-outside="true" placeholder="Client ID"
-              @update:value="check" />
-          </div>
-          <div class="external-label">
-            <label for="ClientSecret">Client Secret</label>
-            <NcPasswordField id="ClientSecret" :value.sync="client_secret" :label-outside="true" @update:value="check"
-              placeholder="Client Secret" />
-          </div>
-          <NcButton :disabled=true :readonly="readonly" :wide="true" text="Save" @click="register" :nativeType="submit"
-            id="Button">
-            <template #icon>
-              <Check :size="20" id="Icon" />
-            </template>
-            Save
-          </NcButton>
-        </form>
+        <div class="external-label">
+          <label for="Name">Name</label>
+          <NcTextField id="Name" :value.sync="name" :label-outside="true" placeholder="Name" @update:value="check" />
+        </div>
+        <div class="external-label">
+          <label for="TokenEndpoint">Token Endpoint</label>
+          <NcTextField id="TokenEndpoint" :value.sync="token_endpoint" :label-outside="true"
+            placeholder="Token Endpoint" @update:value="check" />
+        </div>
+        <div class="external-label">
+          <label for="ClientID">Client ID</label>
+          <NcPasswordField id="ClientID" :value.sync="client_id" :label-outside="true" placeholder="Client ID"
+            @update:value="check" />
+        </div>
+        <div class="external-label">
+          <label for="ClientSecret">Client Secret</label>
+          <NcPasswordField id="ClientSecret" :value.sync="client_secret" :label-outside="true" @update:value="check"
+            placeholder="Client Secret" />
+        </div>
+        <NcButton :disabled=true :readonly="readonly" :wide="true" text="Save" @click="register" :nativeType="submit"
+          id="Button">
+          <template #icon>
+            <Check :size="20" id="Icon" />
+          </template>
+          Save
+        </NcButton>
         <div id="oidc-configured">
           <ul id="oidc-configured-list">
             <NcListItemIcon v-for="i in configured" :name="i.name" :subname="i.token_endpoint">
@@ -89,7 +87,6 @@ export default {
       client_id: "",
       client_secret: "",
       configured: [],
-      id: -1,
       name: "",
       token_endpoint: "",
     }
@@ -100,17 +97,11 @@ export default {
   },
   methods: {
     check() {
-      let name = document.getElementById("Name");
-      let client_id = document.getElementById("ClientID");
-      let client_secret = document.getElementById("ClientSecret");
-      let token_endpoint = document.getElementById("TokenEndpoint");
       var button = document.getElementById("Button");
-      if (name == null || client_id == null || client_secret == null || token_endpoint == null) {
-        return;
-      }
-      if (name.value != "" && client_id.value != "" && client_secret.value != "" && token_endpoint.value != "") {
-        button.type = "primary";
+      if (this.name != "" && this.client_id != "" && this.client_secret != "" && this.token_endpoint != "") {
         button.disabled = false;
+      } else {
+        button.disabled = true;
       }
     },
     async remove(id) {
@@ -123,16 +114,16 @@ export default {
     },
     async register() {
       const url = generateUrl('/apps/integration_oidc/register');
-      var name = document.getElementById("Name").value;
-      var client_id = document.getElementById("ClientID").value;
-      var client_secret = document.getElementById("ClientSecret").value;
-      var token_endpoint = document.getElementById("TokenEndpoint").value;
-      var payload = { 'name': name, 'client_id': client_id, 'client_secret': client_secret, 'token_endpoint': token_endpoint };
+      var payload = { 'name': this.name, 'client_id': this.client_id, 'client_secret': this.client_secret, 'token_endpoint': this.token_endpoint };
       let res = await axios.post(url, payload);
       if (res.data.status == "success") {
         payload.id = res.data.id;
         this.configured.push(payload);
-        document.getElementById("ioidc-form").reset();
+        this.name = "";
+        this.client_id = "";
+        this.client_secret = "";
+        this.token_endpoint = "";
+        this.check();
       }
     },
   },
