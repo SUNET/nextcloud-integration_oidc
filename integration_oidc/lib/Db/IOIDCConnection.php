@@ -28,18 +28,26 @@ class IOIDCConnection
 
     return $rows->fetchAll();
   }
-  public function register(String $name, String $client_id, String $client_secret, String $token_endpoint)
+  public function register(array $params)
   {
+    $auth_endpoint = $params['auth_endpoint'];
+    $client_id = $params['client_id'];
+    $client_secret = $params['client_secret'];
+    $name = $params['name'];
+    $token_endpoint = $params['token_endpoint'];
+    $user_endpoint = $params['user_endpoint'];
     /**
      * @var IQueryBuilder $qb
      * */
     $qb = $this->db->getQueryBuilder();
 
     $qb->insert('ioidc_providers')->values(array(
-      'name' => $qb->createNamedParameter($name),
+      'auth_endpoint' => $qb->createNamedParameter($auth_endpoint),
       'client_id' => $qb->createNamedParameter($client_id),
       'client_secret' => $qb->createNamedParameter($client_secret),
-      'token_endpoint' => $qb->createNamedParameter($token_endpoint)
+      'name' => $qb->createNamedParameter($name),
+      'token_endpoint' => $qb->createNamedParameter($token_endpoint),
+      'user_endpoint' => $qb->createNamedParameter($user_endpoint)
     ));
     $qb->executeStatement();
     $id = $qb->getLastInsertId();

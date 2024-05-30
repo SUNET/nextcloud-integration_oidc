@@ -17,22 +17,26 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Create new table for the integration_oidc app.
  */
-class Version010000Date20240530151450 extends SimpleMigrationStep {
-	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper {
-		/** @var ISchemaWrapper $schema */
-		$schema = $schemaClosure();
+class Version010000Date20240530151450 extends SimpleMigrationStep
+{
+  public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper
+  {
+    /** @var ISchemaWrapper $schema */
+    $schema = $schemaClosure();
 
-    if(! $schema->hasTable('ioidc_providers')){
+    if (!$schema->hasTable('ioidc_providers')) {
       $schema->createTable('ioidc_providers');
       $table = $schema->getTable('ioidc_providers');
       $table->addColumn('id', Types::INTEGER, ['notnull' => true, 'autoincrement' => true]);
-      $table->addColumn('name', Types::STRING, ['notnull' => true]);
+      $table->addColumn('auth_endpoint', Types::STRING, ['notnull' => true]);
       $table->addColumn('client_id', Types::STRING, ['notnull' => true]);
       $table->addColumn('client_secret', Types::STRING, ['notnull' => true]);
+      $table->addColumn('name', Types::STRING, ['notnull' => true]);
       $table->addColumn('token_endpoint', Types::STRING, ['notnull' => true]);
+      $table->addColumn('user_endpoint', Types::STRING, ['notnull' => true]);
       $table->setPrimaryKey(['id']);
     }
 
-		return $schema;
-	}
+    return $schema;
+  }
 }

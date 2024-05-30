@@ -37,7 +37,7 @@ class ApiController extends Controller
   public function register()
   {
     $params = $this->request->getParams();
-    $id = $this->ioidcConnection->register($params['name'], $params['client_id'], $params['client_secret'], $params['token_endpoint']);
+    $id = $this->ioidcConnection->register($params);
     return new DataResponse(['status' => "success", "id" => $id], Http::STATUS_OK);
   }
   /**

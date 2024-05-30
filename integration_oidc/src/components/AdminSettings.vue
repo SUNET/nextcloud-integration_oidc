@@ -8,9 +8,19 @@
           <NcTextField id="Name" :value.sync="name" :label-outside="true" placeholder="Name" @update:value="check" />
         </div>
         <div class="external-label">
+          <label for="AuthEndpoint">Auth Endpoint</label>
+          <NcTextField id="AuthEndpoint" :value.sync="auth_endpoint" :label-outside="true" placeholder="Auth Endpoint"
+            @update:value="check" />
+        </div>
+        <div class="external-label">
           <label for="TokenEndpoint">Token Endpoint</label>
           <NcTextField id="TokenEndpoint" :value.sync="token_endpoint" :label-outside="true"
             placeholder="Token Endpoint" @update:value="check" />
+        </div>
+        <div class="external-label">
+          <label for="UserEndpoint">User Endpoint</label>
+          <NcTextField id="UserEndpoint" :value.sync="user_endpoint" :label-outside="true" placeholder="User Endpoint"
+            @update:value="check" />
         </div>
         <div class="external-label">
           <label for="ClientID">Client ID</label>
@@ -84,11 +94,13 @@ export default {
   props: [],
   data() {
     return {
+      auth_endpoint: "",
       client_id: "",
       client_secret: "",
       configured: [],
       name: "",
       token_endpoint: "",
+      user_endpoint: "",
     }
   },
   mounted() {
@@ -98,7 +110,14 @@ export default {
   methods: {
     check() {
       var button = document.getElementById("Button");
-      if (this.name != "" && this.client_id != "" && this.client_secret != "" && this.token_endpoint != "") {
+      if (
+        this.auth_endpoint != "" &&
+        this.client_id != "" &&
+        this.client_secret != "" &&
+        this.name != "" &&
+        this.token_endpoint != "" &&
+        this.user_endpoint != ""
+      ) {
         button.disabled = false;
       } else {
         button.disabled = true;
@@ -114,15 +133,24 @@ export default {
     },
     async register() {
       const url = generateUrl('/apps/integration_oidc/register');
-      var payload = { 'name': this.name, 'client_id': this.client_id, 'client_secret': this.client_secret, 'token_endpoint': this.token_endpoint };
+      var payload = {
+        'auth_endpoint': this.auth_endpoint,
+        'client_id': this.client_id,
+        'client_secret': this.client_secret,
+        'name': this.name,
+        'token_endpoint': this.token_endpoint,
+        'user_endpoint': this.user_endpoint
+      };
       let res = await axios.post(url, payload);
       if (res.data.status == "success") {
         payload.id = res.data.id;
         this.configured.push(payload);
-        this.name = "";
+        this.auth_endpoint = "";
         this.client_id = "";
         this.client_secret = "";
+        this.name = "";
         this.token_endpoint = "";
+        this.user_endpoint = "";
         this.check();
       }
     },
