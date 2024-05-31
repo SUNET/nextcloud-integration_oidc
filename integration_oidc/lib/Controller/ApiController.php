@@ -10,23 +10,36 @@ use \OCP\IRequest;
 
 class ApiController extends Controller
 {
+  private $userId;
   private IOIDCConnection $ioidcConnection;
   public function __construct(
+    string $userId,
     string $appName,
     IRequest $request,
     IOIDCConnection $ioidcConnection
   ) {
     parent::__construct($appName, $request);
+    $this->userId = $userId;
     $this->ioidcConnection = $ioidcConnection;
   }
   /**
    * @NoCSRFRequired
-   *
+   * @NoAdminRequired
    * @return DataResponse
    **/
   public function query()
   {
     $response = $this->ioidcConnection->query();
+    return new DataResponse($response, Http::STATUS_OK);
+  }
+  /**
+   * @NoCSRFRequired
+   * @NoAdminRequired
+   * @return DataResponse
+   **/
+  public function queryUser()
+  {
+    $response = $this->ioidcConnection->query_user($this->userId);
     return new DataResponse($response, Http::STATUS_OK);
   }
   /**
@@ -42,6 +55,18 @@ class ApiController extends Controller
   }
   /**
    * @NoCSRFRequired
+   * @NoAdminRequired
+   * @return DataResponse
+   **/
+  public function registerUser()
+  {
+    $params = $this->request->getParams();
+    $params['uid'] = $this->userId;
+    $id = $this->ioidcConnection->register_user($params);
+    return new DataResponse(['status' => "success", "id" => $id], Http::STATUS_OK);
+  }
+  /**
+   * @NoCSRFRequired
    *
    * @return DataResponse
    **/
@@ -49,6 +74,18 @@ class ApiController extends Controller
   {
     $params = $this->request->getParams();
     $this->ioidcConnection->remove($params['id']);
+    return new DataResponse(['status' => "success"], Http::STATUS_OK);
+  }
+  /**
+   * @NoCSRFRequired
+   * @NoAdminRequired
+   * @return DataResponse
+   **/
+  public function removeUser()
+  {
+    $params = $this->request->getParams();
+    $params['uid'] = $this->userId;
+    $this->ioidcConnection->remove_user($params);
     return new DataResponse(['status' => "success"], Http::STATUS_OK);
   }
 }

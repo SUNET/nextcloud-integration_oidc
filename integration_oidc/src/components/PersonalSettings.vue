@@ -1,50 +1,106 @@
 <template>
   <div id="ioidc_prefs" class="section">
-    <h2>
-      <IOIDCIcon class="icon" />
-      {{ t('integration_ioidc', 'Integration OIDC') }}
-    </h2>
     <div id="ioidc-content">
-      <p>{{ t('ioidc_prefs_desc', 'This is the description of the integration') }}</p>
+      <div id="oidc-unconfigured">
+        <NcSettingsSection name="Integration OIDC" description="Connect these services to your Nextcloud account."
+          doc-url="https://github.com/SUNET/nextcloud-integration_oidc" @default="populate">
+          <NcButton :disabled=false :readonly="readonly" :wide="true" :nativeType="submit" v-for="i in unconfigured"
+            :text="i.name" :id="i.id" @click="(_) => register(i.id)">
+            {{ i.name }}
+          </NcButton>
+      </div>
+      <div id="oidc-configured">
+        <ul id="oidc-configured-list">
+          <NcListItemIcon v-for="i in configured" :name="i.name" :subname="i.token_endpoint">
+            <NcActions>
+              <NcActionButton @click="(_) => remove(i.id)">
+                <template #icon>
+                  <Delete :size="20" />
+                </template>
+                Delete
+              </NcActionButton>
+            </NcActions>
+          </NcListItemIcon>
+        </ul>
+      </div>
+      </NcSettingsSection>
     </div>
   </div>
 </template>
 
 <script>
-import IOIDCIcon from './icons/IOIDCIcon.vue'
+// Icons
+import Delete from 'vue-material-design-icons/Delete.vue'
+
+// Nextcloud components
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js'
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
+import NcListItemIcon from '@nextcloud/vue/dist/Components/NcListItemIcon.js'
+import NcSettingsSection from '@nextcloud/vue/dist/Components/NcSettingsSection.js'
+
+// Nextcloud API
+import axios from '@nextcloud/axios'
+import { generateUrl } from '@nextcloud/router'
 
 export default {
   name: 'PersonalSettings',
 
   components: {
-    IOIDCIcon,
+    Delete,
+    NcActionButton,
+    NcActions,
+    NcButton,
+    NcListItemIcon,
+    NcSettingsSection,
   },
 
   props: [],
-//   data() {
-//     return {
-//       state: loadState('integration_ioidc', 'admin-config'),
-//       // to prevent some browsers to fill fields with remembered passwords
-//       clientId: "",
-//       clientSecret: "",
-//     }
-//   },
-//   computed: {
-//     configured() {
-//       return !!this.state.client_id || !!this.state.client_secret
-//     },
-//     watch: {
-//     },
-
-//     mounted() {
-//       // if (this.configured) {
-//       // 	this.getModels()
-//       // }
-//       // this.loadQuotaInfo()
-//     },
-//     methods: {
-//       getModels() { },
-//     },
-//   }
+  data() {
+    return {
+      available: [],
+      configured: [],
+      unconfigured: [],
+    }
+  },
+  methods: {
+    async remove(id) {
+      var url = generateUrl('/apps/integration_oidc/remove_user');
+      let params = { 'id': id };
+      let result = await axios.post(url, params);
+      if (result.data.status == 'success') {
+        var removed = this.configured.find((a) => a.id == id);
+        console.log("removed", removed);
+        this.configured = this.configured.filter((a) => a.id !== id);
+        this.unconfigured.push(removed);
+      }
+    },
+    async register(provider_id) {
+      var url = generateUrl('/apps/integration_oidc/register_user');
+      let params = { 'provider_id': provider_id, 'access_token': '123456', 'refresh_token': '123456', 'expires': 3600 };
+      let result = await axios.post(url, params);
+      if (result.data.status == 'success') {
+        let added = this.available.find((a) => a.id == provider_id);
+        this.configured.push(added);
+        this.unconfigured = this.unconfigured.filter((a) => a.id !== provider_id);
+      }
+    }
+  },
+  mounted() {
+    var url = generateUrl('/apps/integration_oidc/query');
+    axios.get(url).then((result) => {
+      this.available = result.data;
+      console.log('available', this.available);
+    });
+    url = generateUrl('/apps/integration_oidc/query_user');
+    axios.get(url).then((result) => {
+      // The configuired providers for this user
+      this.configured = result.data;
+      console.log('configured', this.configured);
+      // All the available not in configured
+      this.unconfigured = this.available.filter((a) => !this.configured.find((c) => c.id == a.id));
+      console.log('unconfigured', this.unconfigured);
+    });
+  },
 }
 </script>

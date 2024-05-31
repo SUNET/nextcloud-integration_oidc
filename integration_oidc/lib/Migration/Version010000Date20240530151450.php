@@ -36,6 +36,16 @@ class Version010000Date20240530151450 extends SimpleMigrationStep
       $table->addColumn('user_endpoint', Types::STRING, ['notnull' => true]);
       $table->setPrimaryKey(['id']);
     }
+    if (!$schema->hasTable('ioidc_userconfig')) {
+      $schema->createTable('ioidc_userconfig');
+      $table = $schema->getTable('ioidc_userconfig');
+      $table->addColumn('id', Types::INTEGER, ['notnull' => true, 'autoincrement' => true]);
+      $table->addColumn('uid', Types::STRING, ['notnull' => true]);
+      $table->addColumn('provider_id', Types::INTEGER, ['notnull' => true]);
+      $table->addColumn('access_token', Types::STRING, ['notnull' => true]);
+      $table->addColumn('refresh_token', Types::STRING, ['notnull' => true]);
+      $table->setPrimaryKey(['id']);
+    }
 
     return $schema;
   }
