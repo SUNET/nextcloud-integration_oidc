@@ -33,7 +33,7 @@ class IOIDCConnection
      * */
     $qb = $this->db->getQueryBuilder();
 
-    $rows = $qb->select('u.id', 'u.provider_id', 'p.name', 'p.token_endpoint')
+    $rows = $qb->select('u.id', 'u.provider_id', 'p.name', 'p.token_endpoint', 'p.client_id', 'p.client_secret')
       ->from('ioidc_userconfig', 'u')
       ->where(
         $qb->expr()->eq(

@@ -43,6 +43,9 @@ import NcSettingsSection from '@nextcloud/vue/dist/Components/NcSettingsSection.
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 
+// oidc-client-ts
+import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts'
+
 export default {
   name: 'PersonalSettings',
 
@@ -76,6 +79,18 @@ export default {
       }
     },
     async register(provider_id) {
+      var provider = this.available.find((a) => a.id == provider_id);
+      var userManager = new UserManager({
+        authority: provider.token_endpoint,
+        client_id: provider.client_id,
+        client_secret: provider.client_secret,
+        redirect_uri: generateUrl('/apps/integration_oidc/callback'),
+        response_type: 'code',
+        scope: 'openid profile email',
+        userStore: new WebStorageStateStore(),
+        loadUserInfo: true,
+      });
+      var res = await userManager.signinRedirect();
       var url = generateUrl('/apps/integration_oidc/register_user');
       let params = { 'provider_id': provider_id, 'access_token': '123456', 'refresh_token': '123456', 'expires': 3600 };
       let result = await axios.post(url, params);

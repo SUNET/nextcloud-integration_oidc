@@ -14,5 +14,7 @@
             "email": "kano@sunet.se"
         }
     ],
-    "require": {}
+    "require": {
+        "psr/log": "^3.0"
+    }
 }
