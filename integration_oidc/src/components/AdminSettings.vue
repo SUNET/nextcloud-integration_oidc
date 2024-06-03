@@ -28,7 +28,7 @@
             @update:value="check" />
         </div>
         <div class="external-label">
-          <label for="GrantType">GrantType</label>
+          <label for="GrantType">Grant Type</label>
           <NcTextField id="GrantType" :value.sync="grant_type" :label-outside="true" placeholder="Grant Type"
             @update:value="check" />
         </div>
