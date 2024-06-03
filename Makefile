@@ -73,7 +73,9 @@ docker: selfsignedcert docker_kill package
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ maintenance:install --admin-user='admin' --admin-pass='adminpassword'"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:enable $(app_name)"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:disable firstrunwizard"
-	firefox -new-tab https://localhost:8443/settings/admin/connected-accounts
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:disable firstrunwizard"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ log:manage --level 0"
+	firefox -new-tab https://127.0.0.1:8443/settings/admin/connected-accounts
 
 sign: package docker_kill
 	docker run --rm --volume $(cert_dir):/certificates --detach --name nextcloud nextcloud:latest

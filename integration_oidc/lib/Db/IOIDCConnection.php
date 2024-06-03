@@ -21,10 +21,34 @@ class IOIDCConnection
      * */
     $qb = $this->db->getQueryBuilder();
 
-    $rows = $qb->select('id', 'name', 'token_endpoint')
+    $rows = $qb->select('id', 'name', 'token_endpoint', 'client_id', 'auth_endpoint')
       ->from('ioidc_providers')->executeQuery();
 
     return $rows->fetchAll();
+  }
+  public function query_state(String $uid, String $state)
+  {
+    /**
+     * @var IQueryBuilder $qb
+     * */
+    $qb = $this->db->getQueryBuilder();
+    $expr = $qb->expr()->eq(
+      's.uid',
+      $qb->createNamedParameter($uid)
+    );
+    $and_expr = $qb->expr()->eq(
+      's.state',
+      $qb->createNamedParameter($state)
+    );
+
+    $rows = $qb->select('s.id', 's.provider_id', 's.state', 'p.name', 'p.token_endpoint', 'p.client_id', 'p.client_secret')
+      ->from('ioidc_stateconfig', 's')
+      ->where($expr)
+      ->andWhere($and_expr)
+      ->innerJoin('s', 'ioidc_providers', 'p', 's.provider_id = p.id')
+      ->executeQuery();
+
+    return $rows->fetchOne();
   }
   public function query_user(String $uid)
   {
@@ -33,7 +57,7 @@ class IOIDCConnection
      * */
     $qb = $this->db->getQueryBuilder();
 
-    $rows = $qb->select('u.id', 'u.provider_id', 'p.name', 'p.token_endpoint', 'p.client_id', 'p.client_secret')
+    $rows = $qb->select('u.id', 'u.provider_id', 'p.name', 'p.auth_endpoint', 'p.client_id', 'p.client_secret')
       ->from('ioidc_userconfig', 'u')
       ->where(
         $qb->expr()->eq(
@@ -51,7 +75,9 @@ class IOIDCConnection
     $auth_endpoint = $params['auth_endpoint'];
     $client_id = $params['client_id'];
     $client_secret = $params['client_secret'];
+    $grant_type = $params['grant_type'];
     $name = $params['name'];
+    $scope = $params['scope'];
     $token_endpoint = $params['token_endpoint'];
     $user_endpoint = $params['user_endpoint'];
     /**
@@ -63,9 +89,30 @@ class IOIDCConnection
       'auth_endpoint' => $qb->createNamedParameter($auth_endpoint),
       'client_id' => $qb->createNamedParameter($client_id),
       'client_secret' => $qb->createNamedParameter($client_secret),
+      'grant_type' => $qb->createNamedParameter($grant_type),
       'name' => $qb->createNamedParameter($name),
+      'scope' => $qb->createNamedParameter($scope),
       'token_endpoint' => $qb->createNamedParameter($token_endpoint),
       'user_endpoint' => $qb->createNamedParameter($user_endpoint)
+    ));
+    $qb->executeStatement();
+    $id = $qb->getLastInsertId();
+    return $id;
+  }
+  public function register_state(array $params)
+  {
+    $uid = $params['uid'];
+    $provider_id = $params['id'];
+    $state = $params['state'];
+    /**
+     * @var IQueryBuilder $qb
+     * */
+    $qb = $this->db->getQueryBuilder();
+
+    $qb->insert('ioidc_stateconfig')->values(array(
+      'uid' => $qb->createNamedParameter($uid),
+      'provider_id' => $qb->createNamedParameter($provider_id),
+      'state' => $qb->createNamedParameter($state),
     ));
     $qb->executeStatement();
     $id = $qb->getLastInsertId();

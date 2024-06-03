@@ -41,10 +41,7 @@ import NcSettingsSection from '@nextcloud/vue/dist/Components/NcSettingsSection.
 
 // Nextcloud API
 import axios from '@nextcloud/axios'
-import { generateUrl } from '@nextcloud/router'
-
-// oidc-client-ts
-import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts'
+import { generateUrl, getBaseUrl } from '@nextcloud/router'
 
 export default {
   name: 'PersonalSettings',
@@ -80,24 +77,38 @@ export default {
     },
     async register(provider_id) {
       var provider = this.available.find((a) => a.id == provider_id);
-      var userManager = new UserManager({
-        authority: provider.token_endpoint,
-        client_id: provider.client_id,
-        client_secret: provider.client_secret,
-        redirect_uri: generateUrl('/apps/integration_oidc/callback'),
-        response_type: 'code',
-        scope: 'openid profile email',
-        userStore: new WebStorageStateStore(),
-        loadUserInfo: true,
-      });
-      var res = await userManager.signinRedirect();
-      var url = generateUrl('/apps/integration_oidc/register_user');
-      let params = { 'provider_id': provider_id, 'access_token': '123456', 'refresh_token': '123456', 'expires': 3600 };
+      console.log("configured", this.configured);
+
+      var form = document.createElement('form');
+      form.setAttribute('method', 'GET'); // Send as a GET request.
+      form.setAttribute('action', provider.auth_endpoint);
+      let state = self.crypto.randomUUID();
+
+      var client_config = {
+        'client_id': provider.client_id,
+        'redirect_uri': getBaseUrl() + '/apps/integration_oidc/callback',
+        'response_type': 'token',
+        'scope': provider.scope,
+        'include_granted_scopes': 'true',
+        'state': state
+      };
+
+      var url = generateUrl('/apps/integration_oidc/register_state');
+      let params = { 'id': id, 'state': state };
       let result = await axios.post(url, params);
       if (result.data.status == 'success') {
-        let added = this.available.find((a) => a.id == provider_id);
-        this.configured.push(added);
-        this.unconfigured = this.unconfigured.filter((a) => a.id !== provider_id);
+        // Add form parameters as hidden input values.
+        for (var c in client_config) {
+          var input = document.createElement('input');
+          input.setAttribute('type', 'hidden');
+          input.setAttribute('name', c);
+          input.setAttribute('value', client_config[c]);
+          form.appendChild(input);
+        }
+        console.log("form", form);
+
+        document.body.appendChild(form);
+        form.submit();
       }
     }
   },

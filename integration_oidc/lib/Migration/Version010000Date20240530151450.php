@@ -31,7 +31,9 @@ class Version010000Date20240530151450 extends SimpleMigrationStep
       $table->addColumn('auth_endpoint', Types::STRING, ['notnull' => true]);
       $table->addColumn('client_id', Types::STRING, ['notnull' => true]);
       $table->addColumn('client_secret', Types::STRING, ['notnull' => true]);
+      $table->addColumn('grant_type', Types::STRING, ['notnull' => true]);
       $table->addColumn('name', Types::STRING, ['notnull' => true]);
+      $table->addColumn('scope', Types::STRING, ['notnull' => true]);
       $table->addColumn('token_endpoint', Types::STRING, ['notnull' => true]);
       $table->addColumn('user_endpoint', Types::STRING, ['notnull' => true]);
       $table->setPrimaryKey(['id']);
@@ -44,6 +46,15 @@ class Version010000Date20240530151450 extends SimpleMigrationStep
       $table->addColumn('provider_id', Types::INTEGER, ['notnull' => true]);
       $table->addColumn('access_token', Types::STRING, ['notnull' => true]);
       $table->addColumn('refresh_token', Types::STRING, ['notnull' => true]);
+      $table->setPrimaryKey(['id']);
+    }
+    if (!$schema->hasTable('ioidc_stateconfig')) {
+      $schema->createTable('ioidc_stateconfig');
+      $table = $schema->getTable('ioidc_stateconfig');
+      $table->addColumn('id', Types::INTEGER, ['notnull' => true, 'autoincrement' => true]);
+      $table->addColumn('uid', Types::STRING, ['notnull' => true]);
+      $table->addColumn('provider_id', Types::INTEGER, ['notnull' => true]);
+      $table->addColumn('state', Types::STRING, ['notnull' => true]);
       $table->setPrimaryKey(['id']);
     }
 

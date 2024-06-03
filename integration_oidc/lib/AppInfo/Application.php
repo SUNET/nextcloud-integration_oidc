@@ -9,10 +9,11 @@ namespace OCA\IOIDC\AppInfo;
 use OCA\IOIDC\Listener\CSPListener;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 
-class Application extends App
+class Application extends App implements IBootstrap
 {
   public const APP_ID = 'integration_oidc';
 

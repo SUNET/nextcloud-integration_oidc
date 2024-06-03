@@ -21,7 +21,6 @@ class CSPListener implements IEventListener
     private  IOIDCConnection $ioidcConnection,
     private LoggerInterface $logger
   ) {
-    $this->ioidcConnection = $ioidcConnection;
   }
 
   public function handle(Event $event): void
@@ -32,9 +31,9 @@ class CSPListener implements IEventListener
     }
     $csp = new ContentSecurityPolicy();
     foreach ($this->ioidcConnection->query() as $provider) {
-      $url = parse_url($provider['token_endpoint']);
+      $url = parse_url($provider['auth_endpoint']);
       $http = $url["scheme"] . "://" . $url["host"];
-      $csp->addAllowedConnectDomain($http);
+      $csp->addAllowedFormActionDomain($http);
     }
 
     $event->addPolicy($csp);
