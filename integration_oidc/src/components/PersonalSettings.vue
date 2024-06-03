@@ -87,7 +87,8 @@ export default {
       var client_config = {
         'client_id': provider.client_id,
         'redirect_uri': getBaseUrl() + '/apps/integration_oidc/callback',
-        'response_type': 'token',
+        'access_type': 'offline',
+        'response_type': 'code',
         'scope': provider.scope,
         'include_granted_scopes': 'true',
         'state': state

@@ -7,28 +7,25 @@ use \OCP\IURLGenerator;
 use \OCP\AppFramework\Controller;
 use \OCP\AppFramework\Http;
 use \OCP\AppFramework\Http\DataResponse;
+use \OCP\AppFramework\Http\RedirectResponse;
 use \OCP\IRequest;
-use Psr\Log\LoggerInterface;
 use GuzzleHttp\Client;
 
 class ApiController extends Controller
 {
   private $userId;
   private IOIDCConnection $ioidcConnection;
-  private LoggerInterface $logger;
   private IURLGenerator $urlGenerator;
   public function __construct(
     string $userId,
     string $appName,
     IRequest $request,
-    LoggerInterface $logger,
     IURLGenerator $urlGenerator,
     IOIDCConnection $ioidcConnection
   ) {
     parent::__construct($appName, $request);
     $this->userId = $userId;
     $this->ioidcConnection = $ioidcConnection;
-    $this->logger = $logger;
     $this->urlGenerator = $urlGenerator;
   }
   /**
@@ -38,37 +35,51 @@ class ApiController extends Controller
    **/
   public function callback()
   {
-    $this->logger->debug('In IOIDCController::callback', ['app' => 'integration_oidc']);
     $params = $this->request->getParams();
     $code = $params['code'];
     $state = $params['state'];
     $result = $this->ioidcConnection->query_state($this->userId, $state);
 
+    $provider_id = $result['provider_id'];
     $client_id = $result['client_id'];
     $client_secret = $result['client_secret'];
     $grant_type = $result['grant_type'];
-    $client = new Client();
-    $url = $this->urlGenerator->getAbsoluteURL('/settings/personal/connected-accounts');
+    $token_endpoint = $result['token_endpoint'];
 
-    $response = $client->request(
-      'POST',
-      $result['token_endpoint'],
+    $client = new Client();
+    $redirect_uri = $this->urlGenerator->getAbsoluteURL('/apps/integration_oidc/callback');
+
+    $response = $client->post(
+      $token_endpoint,
       [
         'form_params' => [
           'client_id' => $client_id,
           'client_secret' => $client_secret,
           'grant_type' => $grant_type,
           'code' => $code,
-          'redirect_uri' => $url
+          'redirect_uri' => $redirect_uri,
         ]
       ]
     );
 
-    // Parse the response object, e.g. read the headers, body, etc.
-    // $headers = $response->getHeaders();
-    // $body = $response->getBody();
+    $body = json_decode($response->getBody()->getContents());
+    $access_token = $body->access_token;
+    $refresh_token = $body->refresh_token;
+    $expires_in = $body->expires_in;
+    $token_type = $body->token_type;
+    $scope = $body->scope;
+    $this->ioidcConnection->register_user([
+      'uid' => $this->userId,
+      'provider_id' => $provider_id,
+      'access_token' => $access_token,
+      'refresh_token' => $refresh_token,
+      'expires_in' => $expires_in,
+      'token_type' => $token_type,
+      'scope' => $scope
+    ]);
 
-    return new DataResponse('', Http::STATUS_OK);
+    $url = $this->urlGenerator->getAbsoluteURL('/settings/user/connected-accounts');
+    return new RedirectResponse($url, Http::STATUS_OK);
   }
   /**
    * @NoCSRFRequired
@@ -111,18 +122,6 @@ class ApiController extends Controller
     $params = $this->request->getParams();
     $params['uid'] = $this->userId;
     $id = $this->ioidcConnection->register_state($params);
-    return new DataResponse(['status' => "success", "id" => $id], Http::STATUS_OK);
-  }
-  /**
-   * @NoCSRFRequired
-   * @NoAdminRequired
-   * @return DataResponse
-   **/
-  public function registerUser()
-  {
-    $params = $this->request->getParams();
-    $params['uid'] = $this->userId;
-    $id = $this->ioidcConnection->register_user($params);
     return new DataResponse(['status' => "success", "id" => $id], Http::STATUS_OK);
   }
   /**

@@ -41,14 +41,14 @@ class IOIDCConnection
       $qb->createNamedParameter($state)
     );
 
-    $rows = $qb->select('s.id', 's.provider_id', 's.state', 'p.name', 'p.token_endpoint', 'p.client_id', 'p.client_secret')
+    $rows = $qb->select('s.id', 's.provider_id', 's.state', 's.uid', 'p.name', 'p.token_endpoint', 'p.client_id', 'p.client_secret', 'p.grant_type')
       ->from('ioidc_stateconfig', 's')
       ->where($expr)
       ->andWhere($and_expr)
       ->innerJoin('s', 'ioidc_providers', 'p', 's.provider_id = p.id')
       ->executeQuery();
 
-    return $rows->fetchOne();
+    return $rows->fetchAll()[0];
   }
   public function query_user(String $uid)
   {

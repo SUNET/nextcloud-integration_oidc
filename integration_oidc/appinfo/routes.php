@@ -20,7 +20,6 @@ return [
     ['name' => 'api#register', 'url' => '/register', 'verb' => 'POST'],
     ['name' => 'api#remove', 'url' => '/remove', 'verb' => 'POST'],
     ['name' => 'api#query_user', 'url' => '/query_user', 'verb' => 'GET'],
-    ['name' => 'api#register_user', 'url' => '/register_user', 'verb' => 'POST'],
     ['name' => 'api#remove_user', 'url' => '/remove_user', 'verb' => 'POST'],
     ['name' => 'api#query_state', 'url' => '/query_state', 'verb' => 'GET'],
     ['name' => 'api#register_state', 'url' => '/register_state', 'verb' => 'POST'],
