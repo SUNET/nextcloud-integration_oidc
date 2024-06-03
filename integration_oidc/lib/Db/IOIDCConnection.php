@@ -21,7 +21,7 @@ class IOIDCConnection
      * */
     $qb = $this->db->getQueryBuilder();
 
-    $rows = $qb->select('id', 'name', 'token_endpoint', 'client_id', 'auth_endpoint')
+    $rows = $qb->select('id', 'name', 'token_endpoint', 'client_id', 'auth_endpoint', 'scope', 'grant_type', 'user_endpoint')
       ->from('ioidc_providers')->executeQuery();
 
     return $rows->fetchAll();

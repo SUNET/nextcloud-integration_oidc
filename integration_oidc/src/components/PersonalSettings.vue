@@ -94,7 +94,7 @@ export default {
       };
 
       var url = generateUrl('/apps/integration_oidc/register_state');
-      let params = { 'id': id, 'state': state };
+      let params = { 'id': provider_id, 'state': state };
       let result = await axios.post(url, params);
       if (result.data.status == 'success') {
         // Add form parameters as hidden input values.
