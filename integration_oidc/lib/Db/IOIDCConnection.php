@@ -109,6 +109,29 @@ class IOIDCConnection
 
     return $rows->fetchAll();
   }
+  public function refresh_token(array $params)
+  {
+
+    // 'access_token' => $access_token,
+    // 'expires_in' => $expires_in,
+    // 'id' => $id,
+    // 'scope' => $scope,
+    // 'token_type' => $token_type,
+    // 'uid' => $uid
+    /**
+     * @var IQueryBuilder $qb
+     * */
+    $qb = $this->db->getQueryBuilder();
+    $qb->update('ioidc_userconfig', 'u')
+      ->set('u.access_token', $qb->createNamedParameter($params['access_token']))
+      ->set('u.expires_in', $qb->createNamedParameter($params['expires_in']))
+      ->set('u.timestamp', $qb->createNamedParameter(time()))
+      ->set('u.scope', $qb->createNamedParameter($params['scope']))
+      ->set('u.token_type', $qb->createNamedParameter($params['token_type']))
+      ->set('u.uid', $qb->createNamedParameter($params['uid']))
+      ->where($qb->expr()->eq('u.id', $qb->createNamedParameter($params['id'])))
+      ->executeQuery();
+  }
   public function register(array $params)
   {
     $auth_endpoint = $params['auth_endpoint'];

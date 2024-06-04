@@ -43,10 +43,14 @@ class Version010000Date20240530151450 extends SimpleMigrationStep
       $schema->createTable('ioidc_userconfig');
       $table = $schema->getTable('ioidc_userconfig');
       $table->addColumn('id', Types::INTEGER, ['notnull' => true, 'autoincrement' => true]);
-      $table->addColumn('uid', Types::STRING, ['notnull' => true]);
-      $table->addColumn('provider_id', Types::INTEGER, ['notnull' => true]);
       $table->addColumn('access_token', Types::STRING, ['notnull' => true]);
+      $table->addColumn('expires_in', Types::INTEGER, ['notnull' => true]);
+      $table->addColumn('provider_id', Types::INTEGER, ['notnull' => true]);
       $table->addColumn('refresh_token', Types::STRING, ['notnull' => true]);
+      $table->addColumn('scope', Types::STRING, ['notnull' => true]);
+      $table->addColumn('timestamp', Types::INTEGER, ['notnull' => true]);
+      $table->addColumn('token_type', Types::STRING, ['notnull' => true]);
+      $table->addColumn('uid', Types::STRING, ['notnull' => true]);
       $table->setPrimaryKey(['id']);
     }
     if (!$schema->hasTable('ioidc_stateconfig')) {
