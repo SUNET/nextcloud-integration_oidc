@@ -34,6 +34,7 @@ class Version010000Date20240530151450 extends SimpleMigrationStep
       $table->addColumn('grant_type', Types::STRING, ['notnull' => true]);
       $table->addColumn('name', Types::STRING, ['notnull' => true]);
       $table->addColumn('scope', Types::STRING, ['notnull' => true]);
+      $table->addColumn('revoke_endpoint', Types::STRING, ['notnull' => true]);
       $table->addColumn('token_endpoint', Types::STRING, ['notnull' => true]);
       $table->addColumn('user_endpoint', Types::STRING, ['notnull' => true]);
       $table->setPrimaryKey(['id']);

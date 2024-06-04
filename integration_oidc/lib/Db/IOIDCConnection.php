@@ -26,6 +26,45 @@ class IOIDCConnection
 
     return $rows->fetchAll();
   }
+  public function get_accesstoken(array $params)
+  {
+    /**
+     * @var IQueryBuilder $qb
+     * */
+    $qb = $this->db->getQueryBuilder();
+    $expr = $qb->expr()->eq(
+      'u.id',
+      $qb->createNamedParameter($params['id'])
+    );
+
+    $rows = $qb->select('u.id', 'u.access_token', 'u.provider_id', 'p.revoke_endpoint')
+      ->from('oc_ioidc_userconfig')
+      ->where($expr)
+      ->innerJoin('u', 'ioidc_providers', 'p', 'u.provider_id = p.id')
+      ->executeQuery();
+
+    return $rows->fetchAll()[0];
+  }
+  public function get_all_accesstoken()
+  {
+    /**
+     * @var IQueryBuilder $qb
+     * */
+    $qb = $this->db->getQueryBuilder();
+
+    // $client_id = $token['client_id'];
+    // $client_secret = $token['client_secret'];
+    // $id = $token['id'];
+    // $refresh_token = $token['refresh_token'];
+    // $token_endpoint = $token['token_endpoint'];
+    // $uid = $token['uid'];
+    $rows = $qb->select('u.provider_id', 'p.id', 'p.client_id','p.client_secret', 'u.id', 'u.refresh_token', 'p.token_endpoint', 'u.uid')
+      ->from('oc_ioidc_accesstoken', 'u')
+      ->innerJoin('u', 'ioidc_providers', 'p', 'u.provider_id = p.id')
+      ->executeQuery();
+
+    return $rows->fetchAll();
+  }
   public function query_state(String $uid, String $state)
   {
     /**

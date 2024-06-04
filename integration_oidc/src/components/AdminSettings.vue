@@ -13,6 +13,11 @@
             @update:value="check" />
         </div>
         <div class="external-label">
+          <label for="RevokeEndpoint">Revoke Endpoint</label>
+          <NcTextField id="RevokeEndpoint" :value.sync="revoke_endpoint" :label-outside="true"
+            placeholder="Revoke Endpoint" @update:value="check" />
+        </div>
+        <div class="external-label">
           <label for="TokenEndpoint">Token Endpoint</label>
           <NcTextField id="TokenEndpoint" :value.sync="token_endpoint" :label-outside="true"
             placeholder="Token Endpoint" @update:value="check" />
@@ -111,6 +116,7 @@ export default {
       grant_type: "",
       name: "",
       scope: "",
+      revoke_endpoint: "",
       token_endpoint: "",
       user_endpoint: "",
     }
@@ -129,6 +135,7 @@ export default {
         this.grant_type != "" &&
         this.name != "" &&
         this.scope != "" &&
+        this.revoke_endpoint != "" &&
         this.token_endpoint != "" &&
         this.user_endpoint != ""
       ) {
@@ -154,6 +161,7 @@ export default {
         'grant_type': this.grant_type,
         'name': this.name,
         'scope': this.scope,
+        'revoke_endpoint': this.revoke_endpoint,
         'token_endpoint': this.token_endpoint,
         'user_endpoint': this.user_endpoint
       };
@@ -167,6 +175,7 @@ export default {
         this.grant_type = "";
         this.name = "";
         this.scope = "";
+        this.revoke_endpoint = "";
         this.token_endpoint = "";
         this.user_endpoint = "";
         this.check();

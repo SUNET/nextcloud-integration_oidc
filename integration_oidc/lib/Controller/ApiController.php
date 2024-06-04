@@ -16,6 +16,7 @@ class ApiController extends Controller
   private $userId;
   private IOIDCConnection $ioidcConnection;
   private IURLGenerator $urlGenerator;
+  private Client $client;
   public function __construct(
     string $userId,
     string $appName,
@@ -27,6 +28,7 @@ class ApiController extends Controller
     $this->userId = $userId;
     $this->ioidcConnection = $ioidcConnection;
     $this->urlGenerator = $urlGenerator;
+    $this->client = new Client();
   }
   /**
    * @NoCSRFRequired
@@ -46,10 +48,9 @@ class ApiController extends Controller
     $grant_type = $result['grant_type'];
     $token_endpoint = $result['token_endpoint'];
 
-    $client = new Client();
     $redirect_uri = $this->urlGenerator->getAbsoluteURL('/apps/integration_oidc/callback');
 
-    $response = $client->post(
+    $response = $this->client->post(
       $token_endpoint,
       [
         'form_params' => [
@@ -69,13 +70,13 @@ class ApiController extends Controller
     $token_type = $body->token_type;
     $scope = $body->scope;
     $this->ioidcConnection->register_user([
-      'uid' => $this->userId,
-      'provider_id' => $provider_id,
       'access_token' => $access_token,
-      'refresh_token' => $refresh_token,
       'expires_in' => $expires_in,
+      'provider_id' => $provider_id,
+      'refresh_token' => $refresh_token,
+      'scope' => $scope,
       'token_type' => $token_type,
-      'scope' => $scope
+      'uid' => $this->userId
     ]);
 
     $url = $this->urlGenerator->getAbsoluteURL('/settings/user/connected-accounts');
@@ -144,6 +145,15 @@ class ApiController extends Controller
   {
     $params = $this->request->getParams();
     $params['uid'] = $this->userId;
+    $response = $this->ioidcConnection->get_accesstoken($params);
+    $this->client->post(
+      $response['revoke_endpoint'],
+      [
+        'form_params' => [
+          'token' => $response['access_token'],
+        ]
+      ]
+    );
     $this->ioidcConnection->remove_user($params);
     return new DataResponse(['status' => "success"], Http::STATUS_OK);
   }
