@@ -18,7 +18,7 @@ class ApiController extends Controller
   private IOIDCConnection $ioidcConnection;
   private IURLGenerator $urlGenerator;
   private Client $client;
-  private LoggerInterface $logger
+  private LoggerInterface $logger;
   public function __construct(
     string $userId,
     string $appName,
