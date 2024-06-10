@@ -86,7 +86,7 @@ export default {
 
       var client_config = {
         'client_id': provider.client_id,
-        'redirect_uri': getBaseUrl() + 'index.php/apps/integration_oidc/callback',
+        'redirect_uri': getBaseUrl() + '/index.php/apps/integration_oidc/callback',
         'access_type': 'offline',
         'response_type': 'code',
         'scope': provider.scope,
