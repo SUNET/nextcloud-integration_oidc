@@ -21,6 +21,9 @@
   <dependencies>
     <nextcloud min-version="28" max-version="29" />
   </dependencies>
+  <background-jobs>
+    <job>OCA\IOIDC\BackgroundJob\RefreshTokens</job>
+</background-jobs>
   <settings>
     <admin>OCA\IOIDC\Settings\AdminSettings</admin>
     <admin-section>OCA\IOIDC\Settings\AdminSection</admin-section>
