@@ -21,7 +21,7 @@ class IOIDCConnection
      * */
     $qb = $this->db->getQueryBuilder();
 
-    $rows = $qb->select('id', 'name', 'token_endpoint', 'client_id', 'auth_endpoint', 'scope', 'grant_type', 'user_endpoint')
+    $rows = $qb->select('id', 'name', 'token_endpoint', 'client_id', 'auth_endpoint', 'scope', 'user_endpoint')
       ->from('ioidc_providers')->executeQuery();
 
     return $rows->fetchAll();
@@ -80,7 +80,7 @@ class IOIDCConnection
       $qb->createNamedParameter($state)
     );
 
-    $rows = $qb->select('s.id', 's.provider_id', 's.state', 's.uid', 'p.name', 'p.token_endpoint', 'p.client_id', 'p.client_secret', 'p.grant_type')
+    $rows = $qb->select('s.id', 's.provider_id', 's.state', 's.uid', 'p.name', 'p.token_endpoint', 'p.client_id', 'p.client_secret')
       ->from('ioidc_stateconfig', 's')
       ->where($expr)
       ->andWhere($and_expr)
@@ -137,7 +137,6 @@ class IOIDCConnection
     $auth_endpoint = $params['auth_endpoint'];
     $client_id = $params['client_id'];
     $client_secret = $params['client_secret'];
-    $grant_type = $params['grant_type'];
     $name = $params['name'];
     $scope = $params['scope'];
     $revoke_endpoint = $params['token_endpoint'];
@@ -152,7 +151,6 @@ class IOIDCConnection
       'auth_endpoint' => $qb->createNamedParameter($auth_endpoint),
       'client_id' => $qb->createNamedParameter($client_id),
       'client_secret' => $qb->createNamedParameter($client_secret),
-      'grant_type' => $qb->createNamedParameter($grant_type),
       'name' => $qb->createNamedParameter($name),
       'scope' => $qb->createNamedParameter($scope),
       'revoke_endpoint' => $qb->createNamedParameter($revoke_endpoint),

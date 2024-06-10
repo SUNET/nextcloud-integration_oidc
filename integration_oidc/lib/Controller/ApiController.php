@@ -45,7 +45,6 @@ class ApiController extends Controller
     $provider_id = $result['provider_id'];
     $client_id = $result['client_id'];
     $client_secret = $result['client_secret'];
-    $grant_type = $result['grant_type'];
     $token_endpoint = $result['token_endpoint'];
 
     $redirect_uri = $this->urlGenerator->getAbsoluteURL('/index.php/apps/integration_oidc/callback');
@@ -56,7 +55,7 @@ class ApiController extends Controller
         'form_params' => [
           'client_id' => $client_id,
           'client_secret' => $client_secret,
-          'grant_type' => $grant_type,
+          'grant_type' => 'authorization_code',
           'code' => $code,
           'redirect_uri' => $redirect_uri,
         ]

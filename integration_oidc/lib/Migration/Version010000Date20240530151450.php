@@ -31,7 +31,6 @@ class Version010000Date20240530151450 extends SimpleMigrationStep
       $table->addColumn('auth_endpoint', Types::STRING, ['notnull' => true]);
       $table->addColumn('client_id', Types::STRING, ['notnull' => true]);
       $table->addColumn('client_secret', Types::STRING, ['notnull' => true]);
-      $table->addColumn('grant_type', Types::STRING, ['notnull' => true]);
       $table->addColumn('name', Types::STRING, ['notnull' => true]);
       $table->addColumn('scope', Types::STRING, ['notnull' => true]);
       $table->addColumn('revoke_endpoint', Types::STRING, ['notnull' => true]);

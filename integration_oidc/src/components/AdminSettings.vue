@@ -33,11 +33,6 @@
             @update:value="check" />
         </div>
         <div class="external-label">
-          <label for="GrantType">Grant Type</label>
-          <NcTextField id="GrantType" :value.sync="grant_type" :label-outside="true" placeholder="Grant Type"
-            @update:value="check" />
-        </div>
-        <div class="external-label">
           <label for="ClientID">Client ID</label>
           <NcPasswordField id="ClientID" :value.sync="client_id" :label-outside="true" placeholder="Client ID"
             @update:value="check" />
@@ -113,7 +108,6 @@ export default {
       client_id: "",
       client_secret: "",
       configured: [],
-      grant_type: "",
       name: "",
       scope: "",
       revoke_endpoint: "",
@@ -132,7 +126,6 @@ export default {
         this.auth_endpoint != "" &&
         this.client_id != "" &&
         this.client_secret != "" &&
-        this.grant_type != "" &&
         this.name != "" &&
         this.scope != "" &&
         this.revoke_endpoint != "" &&
@@ -158,7 +151,6 @@ export default {
         'auth_endpoint': this.auth_endpoint,
         'client_id': this.client_id,
         'client_secret': this.client_secret,
-        'grant_type': this.grant_type,
         'name': this.name,
         'scope': this.scope,
         'revoke_endpoint': this.revoke_endpoint,
@@ -172,7 +164,6 @@ export default {
         this.auth_endpoint = "";
         this.client_id = "";
         this.client_secret = "";
-        this.grant_type = "";
         this.name = "";
         this.scope = "";
         this.revoke_endpoint = "";
