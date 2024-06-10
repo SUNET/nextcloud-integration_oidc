@@ -6,6 +6,7 @@ use OCA\IOIDC\Db\IOIDCConnection;
 use OCP\BackgroundJob\TimedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
 use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
 
 class RefreshTokens extends TimedJob
 {
@@ -13,13 +14,16 @@ class RefreshTokens extends TimedJob
   private IOIDCConnection $ioidcConnection;
   protected int $interval;
   private Client $client;
+  private LoggerInterface $logger;
   public function __construct(
     ITimeFactory $time,
-    IOIDCConnection $ioidcConnection
+    IOIDCConnection $ioidcConnection,
+    LoggerInterface $logger
   ) {
     parent::__construct($time);
     $this->client = new Client();
     $this->ioidcConnection = $ioidcConnection;
+    $this->logger = $logger;
     $this->interval = 3600;
     $this->setInterval($this->interval);
   }
@@ -34,7 +38,7 @@ class RefreshTokens extends TimedJob
     }
   }
 
-  private function refresh_token($token)
+  private function refresh_token(array $token)
   {
     $client_id = $token['client_id'];
     $client_secret = $token['client_secret'];
@@ -53,7 +57,8 @@ class RefreshTokens extends TimedJob
         ]
       ]
     );
-    $body = json_decode($response->getBody()->getContents());
+    $body = json_decode($response->getBody()->getContents(), true);
+
     $access_token = $body['access_token'];
     $expires_in = $body['expires_in'];
     $scope = $body['scope'];

@@ -51,9 +51,8 @@ class IOIDCConnection
      * @var IQueryBuilder $qb
      * */
     $qb = $this->db->getQueryBuilder();
-
-    $rows = $qb->select('u.provider_id', 'p.id', 'p.client_id','p.client_secret', 'u.id', 'u.refresh_token', 'p.token_endpoint', 'u.uid')
-      ->from('ioidc_accesstoken', 'u')
+    $rows = $qb->select('u.provider_id', 'p.id', 'p.client_id','p.client_secret', 'u.id', 'u.refresh_token', 'p.token_endpoint', 'u.uid', 'u.expires_in', 'u.timestamp')
+      ->from('ioidc_userconfig', 'u')
       ->innerJoin('u', 'ioidc_providers', 'p', 'u.provider_id = p.id')
       ->executeQuery();
 
@@ -124,7 +123,7 @@ class IOIDCConnection
       ->set('u.token_type', $qb->createNamedParameter($params['token_type']))
       ->set('u.uid', $qb->createNamedParameter($params['uid']))
       ->where($qb->expr()->eq('u.id', $qb->createNamedParameter($params['id'])))
-      ->executeQuery();
+      ->executeStatement();
   }
   public function register(array $params)
   {
