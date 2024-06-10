@@ -83,7 +83,7 @@ class ApiController extends Controller
       'uid' => $this->userId
     ]);
 
-    $url = $this->urlGenerator->getAbsoluteURL('/settings/user/connected-accounts');
+    $url = $this->urlGenerator->getAbsoluteURL('/index.php/settings/user/connected-accounts');
     return new RedirectResponse($url, Http::STATUS_OK);
   }
   /**
