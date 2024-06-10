@@ -83,14 +83,17 @@ export default {
       form.setAttribute('method', 'GET'); // Send as a GET request.
       form.setAttribute('action', provider.auth_endpoint);
       let state = self.crypto.randomUUID();
+      let nonce = self.crypto.randomUUID();
 
       var client_config = {
-        'client_id': provider.client_id,
-        'redirect_uri': getBaseUrl() + '/index.php/apps/integration_oidc/callback',
         'access_type': 'offline',
+        'client_id': provider.client_id,
+        'include_granted_scopes': 'true',
+        'nonce': nonce,
+        'prompt': 'select_account',
+        'redirect_uri': getBaseUrl() + '/index.php/apps/integration_oidc/callback',
         'response_type': 'code',
         'scope': provider.scope,
-        'include_granted_scopes': 'true',
         'state': state
       };
 

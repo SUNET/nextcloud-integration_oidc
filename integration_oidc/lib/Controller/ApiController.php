@@ -10,6 +10,7 @@ use \OCP\AppFramework\Http\DataResponse;
 use \OCP\AppFramework\Http\RedirectResponse;
 use \OCP\IRequest;
 use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
 
 class ApiController extends Controller
 {
@@ -17,16 +18,19 @@ class ApiController extends Controller
   private IOIDCConnection $ioidcConnection;
   private IURLGenerator $urlGenerator;
   private Client $client;
+  private LoggerInterface $logger
   public function __construct(
     string $userId,
     string $appName,
     IRequest $request,
     IURLGenerator $urlGenerator,
-    IOIDCConnection $ioidcConnection
+    IOIDCConnection $ioidcConnection,
+    LoggerInterface $logger
   ) {
     parent::__construct($appName, $request);
     $this->userId = $userId;
     $this->ioidcConnection = $ioidcConnection;
+    $this->logger = $logger;
     $this->urlGenerator = $urlGenerator;
     $this->client = new Client();
   }
@@ -63,6 +67,7 @@ class ApiController extends Controller
     );
 
     $body = json_decode($response->getBody()->getContents());
+    $this->logger->debug('body: ' . print_r($body, true));
     $access_token = $body->access_token;
     $refresh_token = $body->refresh_token;
     $expires_in = $body->expires_in;
