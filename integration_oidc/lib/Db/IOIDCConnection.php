@@ -140,6 +140,7 @@ class IOIDCConnection
     $grant_type = $params['grant_type'];
     $name = $params['name'];
     $scope = $params['scope'];
+    $revoke_endpoint = $params['token_endpoint'];
     $token_endpoint = $params['token_endpoint'];
     $user_endpoint = $params['user_endpoint'];
     /**
@@ -154,6 +155,7 @@ class IOIDCConnection
       'grant_type' => $qb->createNamedParameter($grant_type),
       'name' => $qb->createNamedParameter($name),
       'scope' => $qb->createNamedParameter($scope),
+      'revoke_endpoint' => $qb->createNamedParameter($revoke_endpoint),
       'token_endpoint' => $qb->createNamedParameter($token_endpoint),
       'user_endpoint' => $qb->createNamedParameter($user_endpoint)
     ));
@@ -182,20 +184,28 @@ class IOIDCConnection
   }
   public function register_user(array $params)
   {
-    $uid = $params['uid'];
-    $provider_id = $params['provider_id'];
     $access_token = $params['access_token'];
+    $expires_in = $params['expires_in'];
+    $provider_id = $params['provider_id'];
     $refresh_token = $params['refresh_token'];
+    $scope = $params['scope'];
+    $timestamp = time();
+    $token_type = $params['token_type'];
+    $uid = $params['uid'];
     /**
      * @var IQueryBuilder $qb
      * */
     $qb = $this->db->getQueryBuilder();
 
     $qb->insert('ioidc_userconfig')->values(array(
-      'uid' => $qb->createNamedParameter($uid),
-      'provider_id' => $qb->createNamedParameter($provider_id),
       'access_token' => $qb->createNamedParameter($access_token),
+      'expires_in' => $qb->createNamedParameter($expires_in),
+      'provider_id' => $qb->createNamedParameter($provider_id),
       'refresh_token' => $qb->createNamedParameter($refresh_token),
+      'scope' => $qb->createNamedParameter($scope),
+      'timestamp' => $qb->createNamedParameter($timestamp),
+      'token_type' => $qb->createNamedParameter($token_type),
+      'uid' => $qb->createNamedParameter($uid),
     ));
     $qb->executeStatement();
     $id = $qb->getLastInsertId();
