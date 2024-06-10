@@ -48,7 +48,7 @@ class ApiController extends Controller
     $grant_type = $result['grant_type'];
     $token_endpoint = $result['token_endpoint'];
 
-    $redirect_uri = $this->urlGenerator->getAbsoluteURL('/apps/integration_oidc/callback');
+    $redirect_uri = $this->urlGenerator->getAbsoluteURL('/index.php/apps/integration_oidc/callback');
 
     $response = $this->client->post(
       $token_endpoint,
