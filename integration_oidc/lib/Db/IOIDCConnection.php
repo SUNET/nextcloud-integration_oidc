@@ -26,7 +26,7 @@ class IOIDCConnection
 
     return $rows->fetchAll();
   }
-  public function get_accesstoken(array $params)
+  public function get_refresh_token(array $params)
   {
     /**
      * @var IQueryBuilder $qb
@@ -37,8 +37,8 @@ class IOIDCConnection
       $qb->createNamedParameter($params['id'])
     );
 
-    $rows = $qb->select('u.id', 'u.access_token', 'u.provider_id', 'p.revoke_endpoint')
-      ->from('oc_ioidc_userconfig')
+    $rows = $qb->select('u.id', 'u.refresh_token', 'u.provider_id', 'p.revoke_endpoint')
+      ->from('ioidc_userconfig', 'u')
       ->where($expr)
       ->innerJoin('u', 'ioidc_providers', 'p', 'u.provider_id = p.id')
       ->executeQuery();
@@ -52,14 +52,8 @@ class IOIDCConnection
      * */
     $qb = $this->db->getQueryBuilder();
 
-    // $client_id = $token['client_id'];
-    // $client_secret = $token['client_secret'];
-    // $id = $token['id'];
-    // $refresh_token = $token['refresh_token'];
-    // $token_endpoint = $token['token_endpoint'];
-    // $uid = $token['uid'];
     $rows = $qb->select('u.provider_id', 'p.id', 'p.client_id','p.client_secret', 'u.id', 'u.refresh_token', 'p.token_endpoint', 'u.uid')
-      ->from('oc_ioidc_accesstoken', 'u')
+      ->from('ioidc_accesstoken', 'u')
       ->innerJoin('u', 'ioidc_providers', 'p', 'u.provider_id = p.id')
       ->executeQuery();
 

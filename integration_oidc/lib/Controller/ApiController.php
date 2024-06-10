@@ -149,12 +149,13 @@ class ApiController extends Controller
   {
     $params = $this->request->getParams();
     $params['uid'] = $this->userId;
-    $response = $this->ioidcConnection->get_accesstoken($params);
+    $response = $this->ioidcConnection->get_refresh_token($params);
     $this->client->post(
       $response['revoke_endpoint'],
       [
         'form_params' => [
-          'token' => $response['access_token'],
+          'refresh_token' => $response['refresh_token'],
+          'grant_type' => 'refresh_token',
         ]
       ]
     );
