@@ -176,10 +176,12 @@ class IOIDCConnection
   public function register_user(array $params)
   {
     $access_token = $params['access_token'];
+    $email = $params['email'];
     $expires_in = $params['expires_in'];
     $provider_id = $params['provider_id'];
     $refresh_token = $params['refresh_token'];
     $scope = $params['scope'];
+    $sub = $params['sub'];
     $timestamp = time();
     $token_type = $params['token_type'];
     $uid = $params['uid'];
@@ -190,10 +192,12 @@ class IOIDCConnection
 
     $qb->insert('ioidc_userconfig')->values(array(
       'access_token' => $qb->createNamedParameter($access_token),
+      'email' => $qb->createNamedParameter($email),
       'expires_in' => $qb->createNamedParameter($expires_in),
       'provider_id' => $qb->createNamedParameter($provider_id),
       'refresh_token' => $qb->createNamedParameter($refresh_token),
       'scope' => $qb->createNamedParameter($scope),
+      'sub' => $qb->createNamedParameter($sub),
       'timestamp' => $qb->createNamedParameter($timestamp),
       'token_type' => $qb->createNamedParameter($token_type),
       'uid' => $qb->createNamedParameter($uid),

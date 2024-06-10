@@ -69,16 +69,22 @@ class ApiController extends Controller
     $body = json_decode($response->getBody()->getContents());
     $this->logger->debug('body: ' . print_r($body, true));
     $access_token = $body->access_token;
-    $refresh_token = $body->refresh_token;
     $expires_in = $body->expires_in;
-    $token_type = $body->token_type;
+    $refresh_token = $body->refresh_token;
     $scope = $body->scope;
+    $token_type = $body->token_type;
+    $id_token = $body->id_token;
+    $id_obj = json_decode(base64_decode($id_token));
+    $email = $id_obj->email;
+    $sub = $id_obj->sub;
     $this->ioidcConnection->register_user([
       'access_token' => $access_token,
+      'email' => $email,
       'expires_in' => $expires_in,
       'provider_id' => $provider_id,
       'refresh_token' => $refresh_token,
       'scope' => $scope,
+      'sub' => $sub,
       'token_type' => $token_type,
       'uid' => $this->userId
     ]);
