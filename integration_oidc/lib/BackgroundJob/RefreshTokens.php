@@ -11,7 +11,7 @@ class RefreshTokens extends TimedJob
 {
 
   private IOIDCConnection $ioidcConnection;
-  private int $interval;
+  protected int $interval;
   private Client $client;
   public function __construct(
     ITimeFactory $time,
