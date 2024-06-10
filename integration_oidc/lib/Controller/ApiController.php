@@ -154,6 +154,7 @@ class ApiController extends Controller
       $response['revoke_endpoint'],
       [
         'form_params' => [
+          'client_id' => $response['client_id'],
           'refresh_token' => $response['refresh_token'],
           'grant_type' => 'refresh_token',
         ]

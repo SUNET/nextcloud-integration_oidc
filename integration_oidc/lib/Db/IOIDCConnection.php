@@ -37,7 +37,7 @@ class IOIDCConnection
       $qb->createNamedParameter($params['id'])
     );
 
-    $rows = $qb->select('u.id', 'u.refresh_token', 'u.provider_id', 'p.revoke_endpoint')
+    $rows = $qb->select('u.id', 'u.refresh_token', 'u.provider_id', 'p.revoke_endpoint', 'p.client_id')
       ->from('ioidc_userconfig', 'u')
       ->where($expr)
       ->innerJoin('u', 'ioidc_providers', 'p', 'u.provider_id = p.id')
