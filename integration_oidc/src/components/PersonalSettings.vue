@@ -90,7 +90,7 @@ export default {
         'client_id': provider.client_id,
         'include_granted_scopes': 'true',
         'nonce': nonce,
-        'prompt': 'select_account',
+        'prompt': 'select_account consent',
         'redirect_uri': getBaseUrl() + '/index.php/apps/integration_oidc/callback',
         'response_type': 'code',
         'scope': provider.scope,
