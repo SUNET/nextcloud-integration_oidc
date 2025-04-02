@@ -1,5 +1,13 @@
-# nextcloud-integration_oidc
+# integration_oidc
+This app provides a generic integration engine for OIDC providers.
+It provides a way to connect any oidc account to Nextcloud.
 
+It works by running the oidc auth flow for a user, including getting consent,
+against any oidc provider and collects a refersh token that is used to
+periodically refesh access tokens allowing other apps to use them for integration,
+such as email sync, calendar sync or anything else.
+
+## Configuration
 For configuring an oidc provider for gmail, this is a sensible start:
 ```
 name: Google
