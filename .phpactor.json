@@ -1,0 +1,9 @@
+{
+    "$schema": "/phpactor.schema.json",
+    "indexer.stub_paths": [
+        "/home/micke/sources/nextcloud/server"
+    ],
+    "language_server_php_cs_fixer.enabled": true,
+    "language_server_php_cs_fixer.bin": "/usr/local/bin/php-cs-fixer",
+    "code_transform.indentation": "  "
+}

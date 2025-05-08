@@ -38,9 +38,9 @@
 #        "build": "node node_modules/gulp-cli/bin/gulp.js"
 #    },
 app_name=integration_oidc
-get_version = $(shell  grep /version $(app_name)/appinfo/info.xml | sed 's/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/')
+get_version = $(shell  grep /version appinfo/info.xml | sed 's/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/')
 cert_dir=$(HOME)/.nextcloud/certificates
-project_dir=$(CURDIR)/$(app_name)
+project_dir=$(CURDIR)
 build_dir=$(project_dir)/build/artifacts
 build_tools_dir=$(project_dir)/build/tools
 sign_dir=$(build_dir)/sign
@@ -77,9 +77,13 @@ docker: selfsignedcert docker_kill package
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ log:manage --level 0"
 	firefox -new-tab https://127.0.0.1:8443/settings/admin/connected-accounts
 
-sign: package docker_kill
-	docker run --rm --volume $(cert_dir):/certificates --detach --name nextcloud nextcloud:latest
+sign: docker_kill package
+	docker run --rm --detach --name nextcloud nextcloud:latest
 	sleep 5
+	docker exec -u root nextcloud  /bin/bash -c "mkdir -p /certificates"
+	docker cp $(cert_dir)/$(app_name).crt nextcloud:/certificates/
+	docker cp $(cert_dir)/$(app_name).key nextcloud:/certificates/
+	docker exec -u root nextcloud /bin/bash -c "chown -R www-data:www-data /certificates"
 	docker exec -u www-data nextcloud /bin/bash -c "mkdir -p /var/www/html/custom_apps"
 	docker cp $(build_dir)/$(app_name)-$(version).tar.gz nextcloud:/var/www/html/custom_apps
 	docker exec -u www-data nextcloud /bin/bash -c "cd /var/www/html/custom_apps && tar -xzf $(app_name)-$(version).tar.gz && rm $(app_name)-$(version).tar.gz"
@@ -88,6 +92,7 @@ sign: package docker_kill
 	docker cp nextcloud:/var/www/html/custom_apps/$(app_name)-$(version).tar.gz $(build_dir)/$(app_name)-$(version).tar.gz
 	sleep 3
 	docker kill nextcloud
+	openssl dgst -sha512 -sign $(cert_dir)/$(app_name).key $(build_dir)/$(app_name)-$(version).tar.gz | openssl base64
 
 appstore: sign
 
