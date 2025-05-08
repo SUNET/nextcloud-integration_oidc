@@ -71,7 +71,9 @@ class ApiController extends Controller
     $access_token = $body->access_token;
     $expires_in = $body->expires_in;
     $refresh_token = $body->refresh_token;
+    $prompt = $body->prompt;
     $scope = $body->scope;
+    $tenant = $body->tenant;
     $token_type = $body->token_type;
     $id_token = $body->id_token;
     $id_obj = json_decode(base64_decode($id_token));
@@ -83,7 +85,9 @@ class ApiController extends Controller
       'expires_in' => $expires_in,
       'provider_id' => $provider_id,
       'refresh_token' => $refresh_token,
+      'prompt' => $prompt,
       'scope' => $scope,
+      'tenant' => $tenant,
       'sub' => $sub,
       'token_type' => $token_type,
       'uid' => $this->userId

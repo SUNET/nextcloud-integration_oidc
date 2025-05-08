@@ -21,7 +21,7 @@ class IOIDCConnection
      * */
     $qb = $this->db->getQueryBuilder();
 
-    $rows = $qb->select('id', 'name', 'token_endpoint', 'client_id', 'auth_endpoint', 'scope', 'user_endpoint')
+    $rows = $qb->select('id', 'name', 'token_endpoint', 'client_id', 'auth_endpoint','prompt', 'scope', 'tenant', 'user_endpoint')
       ->from('ioidc_providers')->executeQuery();
 
     return $rows->fetchAll();
@@ -119,7 +119,9 @@ class IOIDCConnection
       ->set('u.access_token', $qb->createNamedParameter($params['access_token']))
       ->set('u.expires_in', $qb->createNamedParameter($params['expires_in']))
       ->set('u.timestamp', $qb->createNamedParameter(time()))
+      ->set('u.prompt', $qb->createNamedParameter($params['prompt']))
       ->set('u.scope', $qb->createNamedParameter($params['scope']))
+      ->set('u.tenant', $qb->createNamedParameter($params['tenant']))
       ->set('u.token_type', $qb->createNamedParameter($params['token_type']))
       ->set('u.uid', $qb->createNamedParameter($params['uid']))
       ->where($qb->expr()->eq('u.id', $qb->createNamedParameter($params['id'])))
@@ -131,7 +133,9 @@ class IOIDCConnection
     $client_id = $params['client_id'];
     $client_secret = $params['client_secret'];
     $name = $params['name'];
+    $prompt = $params['prompt'];
     $scope = $params['scope'];
+    $tenant = $params['tenant'];
     $revoke_endpoint = $params['token_endpoint'];
     $token_endpoint = $params['token_endpoint'];
     $user_endpoint = $params['user_endpoint'];
@@ -145,7 +149,9 @@ class IOIDCConnection
       'client_id' => $qb->createNamedParameter($client_id),
       'client_secret' => $qb->createNamedParameter($client_secret),
       'name' => $qb->createNamedParameter($name),
+      'prompt' => $qb->createNamedParameter($prompt),
       'scope' => $qb->createNamedParameter($scope),
+      'tenant' => $qb->createNamedParameter($tenant),
       'revoke_endpoint' => $qb->createNamedParameter($revoke_endpoint),
       'token_endpoint' => $qb->createNamedParameter($token_endpoint),
       'user_endpoint' => $qb->createNamedParameter($user_endpoint)
@@ -180,7 +186,9 @@ class IOIDCConnection
     $expires_in = $params['expires_in'];
     $provider_id = $params['provider_id'];
     $refresh_token = $params['refresh_token'];
+    $prompt = $params['prompt'];
     $scope = $params['scope'];
+    $tenant = $params['tenant'];
     $sub = $params['sub'];
     $timestamp = time();
     $token_type = $params['token_type'];
@@ -196,7 +204,9 @@ class IOIDCConnection
       'expires_in' => $qb->createNamedParameter($expires_in),
       'provider_id' => $qb->createNamedParameter($provider_id),
       'refresh_token' => $qb->createNamedParameter($refresh_token),
+      'prompt' => $qb->createNamedParameter($prompt),
       'scope' => $qb->createNamedParameter($scope),
+      'tenant' => $qb->createNamedParameter($tenant),
       'sub' => $qb->createNamedParameter($sub),
       'timestamp' => $qb->createNamedParameter($timestamp),
       'token_type' => $qb->createNamedParameter($token_type),

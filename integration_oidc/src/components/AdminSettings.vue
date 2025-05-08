@@ -3,6 +3,16 @@
     <div id="ioidc-content">
       <NcSettingsSection name="Integration OIDC" description="Generic OIDC integration engine."
         doc-url="https://github.com/SUNET/nextcloud-integration_oidc" @default="populate">
+      <p>Explanations for the parameters are <a :href="documentation_link" target="_blank">documented here</a>. Note that some parameters are provider specific.</p>
+      <form id="ioidc-form" @submit.prevent="save">
+        <div class="external-label">
+          <label for="Provider">Provider</label>
+          <select id="Provider" name="provider" @change="select" v-model="provider">
+            <option id="Generic" required value="Generic" selected>Generic</option>
+            <option id="Google" required value="Google">Google</option>
+            <option id="Microsoft" required value="Microsoft">Microsoft</option>
+          </select>
+        </div>
         <div class="external-label">
           <label for="Name">Name</label>
           <NcTextField id="Name" :value.sync="name" :label-outside="true" placeholder="Name" @update:value="check" />
@@ -28,9 +38,8 @@
             @update:value="check" />
         </div>
         <div class="external-label">
-          <label for="Scope">Scope</label>
-          <NcTextField id="Scope" :value.sync="scope" :label-outside="true" placeholder="Scope"
-            @update:value="check" />
+          <label for="AccessType">Access Type (optional)</label>
+          <NcTextField id="AccessType" :value.sync="access_type" :label-outside="true" placeholder="AccessType" />
         </div>
         <div class="external-label">
           <label for="ClientID">Client ID</label>
@@ -42,6 +51,48 @@
           <NcPasswordField id="ClientSecret" :value.sync="client_secret" :label-outside="true" @update:value="check"
             placeholder="Client Secret" />
         </div>
+        <div class="external-label">
+          <label for="Display">Display (optional)</label>
+          <NcTextField id="Display" :value.sync="display" :label-outside="true" placeholder="Display" />
+        </div>
+        <div class="external-label">
+          <label for="DomainHint">Domain Hint (optional)</label>
+          <NcTextField id="DomainHint" :value.sync="domain_hint" :label-outside="true" placeholder="Domain Hint" />
+        </div>
+        <div class="external-label">
+          <label for="HD">HD (optional)</label>
+          <NcTextField id="HD" :value.sync="hd" :label-outside="true" placeholder="HD" />
+        </div>
+        <div class="external-label">
+          <label for="IncludeGrantedScopes">Include Granted Scopes (optional)</label>
+          <NcTextField id="IncludeGrantedScopes" :value.sync="include_granted_scopes" :label-outside="true" placeholder="Include Granted Scopes" />
+        </div>
+        <div class="external-label">
+          <label for="LoginHint">login Hint (optional)</label>
+          <NcTextField id="LoginHint" :value.sync="login_hint" :label-outside="true" placeholder="Login Hint" />
+        </div>
+        <div class="external-label">
+          <label for="Prompt">Prompt (optional)</label>
+          <NcTextField id="Prompt" :value.sync="prompt" :label-outside="true" placeholder="Prompt" />
+        </div>
+        <div class="external-label">
+          <label for="ResponseMode">Response Mode (optional)</label>
+          <NcTextField id="ResponseMode" :value.sync="response_mode" :label-outside="true" placeholder="Response Mode" />
+        </div>
+        <div class="external-label">
+          <label for="ResponseType">Response Type</label>
+          <NcTextField id="ResponseType" :value.sync="response_type" :label-outside="true" placeholder="Response Type"
+            @update:value="check" />
+        </div>
+        <div class="external-label">
+          <label for="Scope">Scope</label>
+          <NcTextField id="Scope" :value.sync="scope" :label-outside="true" placeholder="Scope"
+            @update:value="check" />
+        </div>
+        <div class="external-label">
+          <label for="Tenant">Tenant (required for Microsoft)</label>
+          <NcTextField id="Tenant" :value.sync="tenant" :label-outside="true" placeholder="Tenant" />
+        </div>
         <NcButton :disabled=true :readonly="readonly" :wide="true" text="Save" @click="register" :nativeType="submit"
           id="Button">
           <template #icon>
@@ -49,22 +100,23 @@
           </template>
           Save
         </NcButton>
-        <div id="oidc-configured">
-          <ul id="oidc-configured-list">
-            <NcListItemIcon v-for="i in configured" :name="i.name" :subname="i.token_endpoint">
-              <NcActions>
-                <NcActionButton @click="(_) => remove(i.id)">
-                  <template #icon>
-                    <Delete :size="20" />
-                  </template>
-                  Delete
-                </NcActionButton>
-              </NcActions>
-            </NcListItemIcon>
-          </ul>
-        </div>
-      </NcSettingsSection>
-    </div>
+      </form>
+      <div id="oidc-configured">
+        <ul id="oidc-configured-list">
+          <NcListItemIcon v-for="i in configured" :name="i.name" :subname="i.token_endpoint" v-bind:key="i.id">
+            <NcActions>
+              <NcActionButton @click="(_) => remove(i.id)">
+                <template #icon>
+                  <Delete :size="20" />
+                </template>
+                Delete
+              </NcActionButton>
+            </NcActions>
+          </NcListItemIcon>
+        </ul>
+      </div>
+    </NcSettingsSection>
+  </div>
 </template>
 
 <script>
@@ -104,13 +156,25 @@ export default {
   props: [],
   data() {
     return {
+      access_type: "",
       auth_endpoint: "",
       client_id: "",
       client_secret: "",
       configured: [],
+      documentation_link: "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
+      display: "",
+      domain_hint: "",
+      hd: "",
+      include_granted_scopes: "",
+      login_hint: "",
       name: "",
-      scope: "",
+      prompt: "",
+      provider: "Generic",
       revoke_endpoint: "",
+      response_mode: "",
+      response_type: "",
+      scope: "",
+      tenant: "",
       token_endpoint: "",
       user_endpoint: "",
     }
@@ -127,14 +191,50 @@ export default {
         this.client_id != "" &&
         this.client_secret != "" &&
         this.name != "" &&
-        this.scope != "" &&
+        this.prompt != "" &&
+        this.response_type != "" &&
         this.revoke_endpoint != "" &&
+        this.scope != "" &&
         this.token_endpoint != "" &&
         this.user_endpoint != ""
       ) {
         button.disabled = false;
       } else {
         button.disabled = true;
+      }
+    },
+    select(e) {
+      var selected = e.target.value;
+      var hidden = [];
+      switch (selected) {
+        case "Google":
+          hidden = ["DomainHint", "ResponseMode", "Tenant"];
+          this.documentation_link = "https://developers.google.com/identity/openid-connect/openid-connect#authenticationuriparameters"
+          break;
+        case "Microsoft":
+          hidden = ["AccessType", "Display", "HD", "IncludeGrantedScopes"];
+          this.documentation_link = "https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc#send-the-sign-in-request"
+          break;
+        default:
+          this.documentation_link = "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest"
+          hidden = [];
+      }
+      var form = document.getElementById("ioidc-form");
+      for (var i = 0; i < form.length; i++) {
+        var input = form[i];
+        var label = document.querySelector('label[for="' + input.id +'"]');
+        console.log(input.id);
+        if (input.id) {
+          if (hidden.includes(input.id)) {
+            console.log("hidden");
+            input.parentNode.style.display = "none";
+            label.style.display = "none";
+          } else {
+            console.log("visible");
+            input.parentNode.style.display = "block";
+            label.style.display = "block";
+          }
+        }
       }
     },
     async remove(id) {
@@ -152,7 +252,9 @@ export default {
         'client_id': this.client_id,
         'client_secret': this.client_secret,
         'name': this.name,
+        'prompt': this.prompt,
         'scope': this.scope,
+        'tenant': this.tenant,
         'revoke_endpoint': this.revoke_endpoint,
         'token_endpoint': this.token_endpoint,
         'user_endpoint': this.user_endpoint
@@ -166,6 +268,7 @@ export default {
         this.client_secret = "";
         this.name = "";
         this.scope = "";
+        this.tenant = "";
         this.revoke_endpoint = "";
         this.token_endpoint = "";
         this.user_endpoint = "";
