@@ -1,0 +1,175 @@
+{
+  "name": "domain-browser",
+  "version": "5.7.0",
+  "license": "Artistic-2.0",
+  "description": "Node's domain module for the web browser. This is merely an evented try...catch with the same API as node, nothing more.",
+  "homepage": "https://github.com/bevry/domain-browser",
+  "funding": "https://bevry.me/fund",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bevry/domain-browser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bevry/domain-browser/issues"
+  },
+  "keywords": [
+    "amd",
+    "browser",
+    "catch",
+    "component",
+    "component.io",
+    "domain",
+    "ender.js",
+    "es5",
+    "node",
+    "node-compat",
+    "require.js",
+    "try",
+    "trycatch",
+    "umd"
+  ],
+  "badges": {
+    "list": [
+      "githubworkflow",
+      "npmversion",
+      "npmdownloads",
+      "---",
+      "githubsponsors",
+      "thanksdev",
+      "patreon",
+      "liberapay",
+      "buymeacoffee",
+      "opencollective",
+      "crypto",
+      "paypal",
+      "---",
+      "discord",
+      "twitch"
+    ],
+    "config": {
+      "githubWorkflow": "bevry",
+      "githubSponsorsUsername": "balupton",
+      "thanksdevGithubUsername": "bevry",
+      "buymeacoffeeUsername": "balupton",
+      "cryptoURL": "https://bevry.me/crypto",
+      "flattrUsername": "balupton",
+      "liberapayUsername": "bevry",
+      "opencollectiveUsername": "bevry",
+      "patreonUsername": "bevry",
+      "paypalURL": "https://bevry.me/paypal",
+      "wishlistURL": "https://bevry.me/wishlist",
+      "discordServerID": "1147436445783560193",
+      "discordServerInvite": "nQuXddV7VP",
+      "twitchUsername": "balupton",
+      "githubUsername": "bevry",
+      "githubRepository": "domain-browser",
+      "githubSlug": "bevry/domain-browser",
+      "npmPackageName": "domain-browser"
+    }
+  },
+  "author": "Benjamin Lupton <b@lupton.cc> (https://balupton.com) (https://github.com/balupton)",
+  "authors": [
+    "Benjamin Lupton <b@lupton.cc> (https://balupton.com) (https://github.com/balupton): Accelerating collaborative wisdom."
+  ],
+  "maintainers": [
+    "Benjamin Lupton <b@lupton.cc> (https://balupton.com) (https://github.com/balupton): Accelerating collaborative wisdom."
+  ],
+  "contributors": [
+    "Benjamin Lupton <b@lupton.cc> (https://balupton.com) (https://github.com/balupton)",
+    "Bogdan Chadkin <trysound@yandex.ru> (https://github.com/TrySound)",
+    "Evan Solomon (https://evansolomon.me) (https://github.com/evansolomon)",
+    "Guy Bedford <guybedford@gmail.com> (https://guybedford.com) (https://github.com/guybedford)",
+    "James Halliday <substack@gmail.com> (https://github.com/substack)",
+    "Sammy filly (https://github.com/X-oss-byte)"
+  ],
+  "sponsors": [
+    "Andrew Nesbitt (https://nesbitt.io) (https://github.com/andrew): Software engineer and researcher",
+    "Balsa <hello@balsa.com> (https://balsa.com) (https://github.com/balsa): We're Balsa, and we're building tools for builders.",
+    "Codecov <hello-codecov@sentry.io> (https://codecov.io) (https://github.com/codecov): Empower developers with tools to improve code quality and testing.",
+    "Poonacha Medappa (https://poonachamedappa.com) (https://github.com/km-Poonacha)",
+    "Rob Morris <rob@prismatik.com.au> (https://github.com/Rob-Morris)",
+    "Sentry (https://sentry.io) (https://github.com/getsentry): Real-time crash reporting for your web apps, mobile apps, and games.",
+    "Syntax <scott@syntax.fm> (https://syntax.fm) (https://github.com/syntaxfm): Syntax Podcast"
+  ],
+  "donors": [
+    "Andrew Nesbitt (https://nesbitt.io) (https://github.com/andrew)",
+    "Armen Mkrtchian (https://mogoni.dev) (https://github.com/Armenm)",
+    "Balsa <hello@balsa.com> (https://balsa.com) (https://github.com/balsa)",
+    "Chad (https://opencollective.com/chad8)",
+    "Codecov <hello-codecov@sentry.io> (https://codecov.io) (https://github.com/codecov)",
+    "dr.dimitru (https://veliovgroup.com) (https://github.com/dr-dimitru)",
+    "Elliott Ditman (https://elliottditman.com) (https://github.com/elliottditman)",
+    "entroniq (https://gitlab.com/entroniq) (https://thanks.dev/d/gl/entroniq)",
+    "GitHub (https://github.com/about) (https://github.com/github)",
+    "Hunter Beast (https://cryptoquick.com) (https://github.com/cryptoquick)",
+    "Jean-Luc Geering (https://github.com/jlgeering) (https://opencollective.com/jlgeering) (https://twitter.com/jlgeering)",
+    "Michael Duane Mooring (https://mdm.cc) (https://github.com/mikeumus) (https://opencollective.com/mikeumus) (https://twitter.com/mikeumus)",
+    "Michael Harry Scepaniak <mhs1.sys@gmail.com> (https://michaelscepaniak.com) (https://github.com/hispanic)",
+    "Mohammed Shah <shah@idk.uno> (https://github.com/smashah) (https://thanks.dev/d/gh/smashah) (https://twitter.com/smashah)",
+    "Mr. Henry <hello@mrhenry.be> (https://mrhenry.be) (https://github.com/mrhenry)",
+    "Nermal <nermalcat69@skiff.com> (https://arjunaditya.vercel.app) (https://github.com/nermalcat69)",
+    "Pleo (https://pleo.io) (https://github.com/pleo-io)",
+    "Poonacha Medappa (https://poonachamedappa.com) (https://github.com/km-Poonacha)",
+    "Rob Morris <rob@prismatik.com.au> (https://github.com/Rob-Morris)",
+    "Robert de Forest <guitar.robot@gmail.com> (https://github.com/rdeforest)",
+    "Sentry (https://sentry.io) (https://github.com/getsentry)",
+    "ServieJS (https://github.com/serviejs) (https://thanks.dev/d/gh/serviejs)",
+    "Skunk Team (https://skunk.team) (https://github.com/skunkteam)",
+    "Syntax <scott@syntax.fm> (https://syntax.fm) (https://github.com/syntaxfm)",
+    "WriterJohnBuck (https://github.com/WriterJohnBuck)"
+  ],
+  "engines": {
+    "node": ">=4"
+  },
+  "editions": [
+    {
+      "description": "ES5 source code for web browsers and Node.js 4 || 6 || 8 || 10 || 12 || 14 || 16 || 18 || 20 || 21 with Require for modules",
+      "directory": "source",
+      "entry": "index.js",
+      "tags": [
+        "source",
+        "javascript",
+        "es5",
+        "require"
+      ],
+      "engines": {
+        "node": "4 || 6 || 8 || 10 || 12 || 14 || 16 || 18 || 20 || 21",
+        "browsers": "defaults"
+      }
+    }
+  ],
+  "type": "commonjs",
+  "main": "source/index.js",
+  "browser": "source/index.js",
+  "jspm": {
+    "map": {
+      "source/index.js": {
+        "node": "@node/domain"
+      }
+    }
+  },
+  "devDependencies": {
+    "assert-helpers": "^11.12.0",
+    "kava": "^7.8.0",
+    "projectz": "^4.1.1",
+    "valid-directory": "^4.8.0"
+  },
+  "scripts": {
+    "our:clean": "rm -rf ./docs ./edition* ./es2015 ./es5 ./out ./.next",
+    "our:compile": "printf '%s\n' 'no need for this project'",
+    "our:deploy": "printf '%s\n' 'no need for this project'",
+    "our:meta": "npm run our:meta:projectz",
+    "our:meta:projectz": "projectz --offline",
+    "our:release": "npm run our:release:prepare && npm run our:release:check-changelog && npm run our:release:check-dirty && npm run our:release:tag && npm run our:release:push",
+    "our:release:check-changelog": "cat ./HISTORY.md | grep \"v$npm_package_version\" || (printf '%s\n' \"add a changelog entry for v$npm_package_version\" && exit -1)",
+    "our:release:check-dirty": "git diff --exit-code",
+    "our:release:prepare": "npm run our:clean && npm run our:compile && npm run our:test && npm run our:meta",
+    "our:release:push": "git push origin && git push origin --tags",
+    "our:release:tag": "export MESSAGE=$(cat ./HISTORY.md | sed -n \"/## v$npm_package_version/,/##/p\" | sed 's/## //' | awk 'NR>1{print buf}{buf = $0}') && test \"$MESSAGE\" || (printf '%s\n' 'proper changelog entry not found' && exit -1) && git tag \"v$npm_package_version\" -am \"$MESSAGE\"",
+    "our:setup": "npm run our:setup:install",
+    "our:setup:install": "npm install",
+    "our:test": "npm run our:verify && npm test",
+    "our:verify": "printf '%s\n' 'no need for this project'",
+    "test": "node ./source/test.js"
+  }
+}

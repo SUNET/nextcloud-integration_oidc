@@ -1,0 +1,21 @@
+{
+    "name": "sunet/integration_oidc",
+    "description": "Easily integrate OIDC providers",
+    "type": "project",
+    "license": "AGPL v3",
+    "autoload": {
+        "psr-4": {
+            "OCA\\IOIDC\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Micke Nordin",
+            "email": "kano@sunet.se"
+        }
+    ],
+    "require": {
+        "psr/log": "^3.0",
+        "guzzlehttp/guzzle": "^7.8"
+    }
+}

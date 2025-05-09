@@ -40,7 +40,7 @@
 app_name=integration_oidc
 get_version = $(shell  grep /version $(app_name)/appinfo/info.xml | sed 's/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/')
 cert_dir=$(HOME)/.nextcloud/certificates
-project_dir=$(CURDIR)/$(app_name)
+project_dir=$(CURDIR)
 build_dir=$(project_dir)/build/artifacts
 build_tools_dir=$(project_dir)/build/tools
 sign_dir=$(build_dir)/sign
