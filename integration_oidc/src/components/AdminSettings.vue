@@ -268,6 +268,7 @@ export default {
         this.client_secret = "";
         this.name = "";
         this.scope = "";
+        this.prompt = "";
         this.tenant = "";
         this.revoke_endpoint = "";
         this.token_endpoint = "";

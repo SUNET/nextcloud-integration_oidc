@@ -14,82 +14,92 @@ use OCP\AppFramework\Db\Entity;
 class IOIDCProvider extends Entity
 {
     /**
-    * @var ?string $accessType
-    */
+     * @var ?string $accessType
+     */
     protected $accessType;
     /**
-    * @var string $clientId
-    */
+     * @var string $authEndpoint
+     */
+    protected $authEndpoint;
+    /**
+     * @var string $clientId
+     */
     protected $clientId;
     /**
-    * @var string $clientSecret
-    */
+     * @var string $clientSecret
+     */
     protected $clientSecret;
     /**
-    * @var $int $createdAt
-    */
-    protected $createdAt;
-    /**
-    * @var ?string $display
-    */
+     * @var ?string $display
+     */
     protected $display;
     /**
-    * @var ?string $domainHint
-    */
+     * @var ?string $domainHint
+     */
     protected $domainHint;
     /**
-    * @var ?string $hd
-    */
+     * @var ?string $hd
+     */
     protected $hd;
     /**
-    * @var ?string $includeGrantedScopes
-    */
+     * @var ?string $includeGrantedScopes
+     */
     protected $includeGrantedScopes;
     /**
-    * @var ?string $loginHint
-    */
+     * @var ?string $loginHint
+     */
     protected $loginHint;
     /**
-    * @var ?string $prompt
-    */
+     * @var string $name
+     */
+    protected $name;
+    /**
+     * @var ?string $prompt
+     */
     protected $prompt;
     /**
-    * @var ?string $responseMode
-    */
+     * @var ?string $responseMode
+     */
     protected $responseMode;
     /**
-    * @var ?string $responseType
-    */
+     * @var ?string $responseType
+     */
     protected $responseType;
     /**
-    * @var string $scope
-    */
+     * @var string $scope
+     */
     protected $scope;
     /**
-    * @var string $tenant
-    */
+     * @var string $tenant
+     */
     protected $tenant;
     /**
-    * @var $int $updatedAt
-    */
-    protected $updatedAt;
+     * @var string $tokenEndpoint
+     */
+    protected $tokenEndpoint;
+    /**
+     * @var string $userEndpoint
+     */
+    protected $userEndpoint;
 
-    public function __construct(
-    ) {
+    public function __construct()
+    {
         $this->addType('accessType', 'string');
+        $this->addType('authEndpoint', 'string');
         $this->addType('clientId', 'string');
         $this->addType('clientSecret', 'string');
-        $this->addType('createdAt', 'integer');
         $this->addType('display', 'string');
         $this->addType('domainHint', 'string');
         $this->addType('hd', 'string');
         $this->addType('includeGrantedScopes', 'string');
         $this->addType('loginHint', 'string');
+        $this->addType('name', 'string');
         $this->addType('prompt', 'string');
         $this->addType('responseMode', 'string');
         $this->addType('responseType', 'string');
         $this->addType('scope', 'string');
         $this->addType('tenant', 'string');
-        $this->addType('updatedAt', 'integer');
+        $this->addType('tokenEndpoint', 'string');
+        $this->addType('userEndpoint', 'string');
     }
 }

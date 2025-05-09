@@ -14,82 +14,57 @@ use OCP\AppFramework\Db\Entity;
 class IOIDCUser extends Entity
 {
     /**
-    * @var ?string $accessType
-    */
-    protected $accessType;
+     * @var string $accessToken
+     */
+    protected $accessToken;
     /**
-    * @var string $clientId
-    */
-    protected $clientId;
+     * @var string email
+     */
+    protected $email;
     /**
-    * @var string $clientSecret
-    */
-    protected $clientSecret;
+     * @var int $expiresIn
+     */
+    protected $expiresIn;
     /**
-    * @var $int $createdAt
-    */
-    protected $createdAt;
+     * @var string  $idProvider
+     */
+    protected $providerId;
     /**
-    * @var ?string $display
-    */
-    protected $display;
+     * @var string $refreshToken
+     */
+    protected $refreshToken;
     /**
-    * @var ?string $domainHint
-    */
-    protected $domainHint;
-    /**
-    * @var ?string $hd
-    */
-    protected $hd;
-    /**
-    * @var ?string $includeGrantedScopes
-    */
-    protected $includeGrantedScopes;
-    /**
-    * @var ?string $loginHint
-    */
-    protected $loginHint;
-    /**
-    * @var ?string $prompt
-    */
-    protected $prompt;
-    /**
-    * @var ?string $responseMode
-    */
-    protected $responseMode;
-    /**
-    * @var ?string $responseType
-    */
-    protected $responseType;
-    /**
-    * @var string $scope
-    */
+     * @var string $scope
+     */
     protected $scope;
     /**
-    * @var string $tenant
-    */
-    protected $tenant;
+     * @var string $sub
+     */
+    protected $sub;
     /**
-    * @var $int $updatedAt
-    */
-    protected $updatedAt;
+     * @var int $timestamp
+     */
+    protected $timestamp;
+    /**
+     * @var string $tokenType
+     */
+    protected $tokenType;
+    /**
+     * @var string $uid
+     */
+    protected $uid;
 
-    public function __construct(
-    ) {
-        $this->addType('accessType', 'string');
-        $this->addType('clientId', 'string');
-        $this->addType('clientSecret', 'string');
-        $this->addType('createdAt', 'integer');
-        $this->addType('display', 'string');
-        $this->addType('domainHint', 'string');
-        $this->addType('hd', 'string');
-        $this->addType('includeGrantedScopes', 'string');
-        $this->addType('loginHint', 'string');
-        $this->addType('prompt', 'string');
-        $this->addType('responseMode', 'string');
-        $this->addType('responseType', 'string');
+    public function __construct()
+    {
+        $this->addType('accessToken', 'string');
+        $this->addType('email', 'string');
+        $this->addType('expiresIn', 'int');
+        $this->addType('providerId', 'string');
+        $this->addType('refreshToken', 'string');
         $this->addType('scope', 'string');
-        $this->addType('tenant', 'string');
-        $this->addType('updatedAt', 'integer');
+        $this->addType('sub', 'string');
+        $this->addType('timestamp', 'int');
+        $this->addType('tokenType', 'string');
+        $this->addType('uid', 'string');
     }
 }
