@@ -248,29 +248,47 @@ export default {
     async register() {
       const url = generateUrl('/apps/integration_oidc/register');
       var payload = {
+        'access_type': this.access_type,
         'auth_endpoint': this.auth_endpoint,
         'client_id': this.client_id,
         'client_secret': this.client_secret,
+        'display': this.display,
+        'domain_hint': this.domain_hint,
+        'hd': this.hd,
+        'include_granted_scopes': this.include_granted_scopes,
+        'login_hint': this.login_hint,
         'name': this.name,
         'prompt': this.prompt,
+        'revoke_endpoint': this.revoke_endpoint,
+        'response_endpoint': this.response_endpoint,
+        'response_mode': this.response_mode,
+        'response_type': this.response_type,
         'scope': this.scope,
         'tenant': this.tenant,
-        'revoke_endpoint': this.revoke_endpoint,
         'token_endpoint': this.token_endpoint,
         'user_endpoint': this.user_endpoint
       };
       let res = await axios.post(url, payload);
       if (res.data.status == "success") {
         payload.id = res.data.id;
-        this.configured.push(payload);
+        this.access_type = "";
         this.auth_endpoint = "";
         this.client_id = "";
         this.client_secret = "";
+        this.configured.push(payload);
+        this.display = "";
+        this.domain_hint = "";
+        this.hd = "";
+        this.include_granted_scopes = "";
+        this.login_hint = "";
         this.name = "";
-        this.scope = "";
         this.prompt = "";
-        this.tenant = "";
         this.revoke_endpoint = "";
+        this.response_endpoint =  "";
+        this.response_mode = "";
+        this.response_type = "";
+        this.scope = "";
+        this.tenant = "";
         this.token_endpoint = "";
         this.user_endpoint = "";
         this.check();

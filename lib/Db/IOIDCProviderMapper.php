@@ -9,11 +9,10 @@ declare(strict_types=1);
 
 namespace OCA\IOIDC\Db;
 
-use OCA\IOIDC\Db\Entity\IOIDCProvider;
+use OCA\IOIDC\Db\IOIDCProvider;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
-use Psr\Log\LoggerInterface;
 
 /**
  * @template-extends QBMapper<IOIDCProvider>
@@ -21,15 +20,11 @@ use Psr\Log\LoggerInterface;
 class IOIDCProviderMapper extends QBMapper
 {
     public const TABLE_NAME = 'ioidc_providers';
-    private LoggerInterface $logger;
 
     public function __construct(
         IDBConnection $db,
-        LoggerInterface $logger
-    )
-    {
+    ) {
         parent::__construct($db, self::TABLE_NAME);
-        $this->logger = $logger;
     }
     /**
      * @return array
@@ -43,7 +38,7 @@ class IOIDCProviderMapper extends QBMapper
         $response = array();
 
         $query = $qb->select('*')
-          ->from(self::TABLE_NAME);
+            ->from(self::TABLE_NAME);
         $entities = $this->findEntities($query);
         foreach ($entities as $entity) {
             array_push($response, array($entity));
@@ -56,15 +51,9 @@ class IOIDCProviderMapper extends QBMapper
      */
     public function register(array $params): int
     {
-        try {
-            $entity =  $this->mapRowToEntity($params);
-            $this->insert($entity);
-            $entity = $this->mapRowToEntity($params);
-            $this->insert($entity);
-            return $entity->getId();
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            return -1;
-        }
+        $entity = new IOIDCProvider();
+        $entity->setParams($params);
+        $entity = $this->insert($entity);
+        return $entity->getId();
     }
 }
