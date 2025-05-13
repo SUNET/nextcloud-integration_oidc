@@ -26,16 +26,16 @@ class Version011000Date20250505141450 extends SimpleMigrationStep
 
         if ($schema->hasTable('ioidc_providers')) {
             $table = $schema->getTable('ioidc_providers');
-            $table->addColumn('access_type', Types::STRING, ['notnull' => true]);
-            $table->addColumn('display', Types::STRING, ['notnull' => true]);
-            $table->addColumn('domain_hint', Types::STRING, ['notnull' => true]);
-            $table->addColumn('hd', Types::STRING, ['notnull' => true]);
-            $table->addColumn('include_granted_scopes', Types::STRING, ['notnull' => true]);
-            $table->addColumn('login_hint', Types::STRING, ['notnull' => true]);
+            $table->addColumn('access_type', Types::STRING, ['notnull' => false]);
+            $table->addColumn('display', Types::STRING, ['notnull' => false]);
+            $table->addColumn('domain_hint', Types::STRING, ['notnull' => false]);
+            $table->addColumn('hd', Types::STRING, ['notnull' => false]);
+            $table->addColumn('include_granted_scopes', Types::STRING, ['notnull' => false]);
+            $table->addColumn('login_hint', Types::STRING, ['notnull' => false]);
             $table->addColumn('prompt', Types::STRING, ['notnull' => true]);
-            $table->addColumn('response_mode', Types::STRING, ['notnull' => true]);
-            $table->addColumn('response_type', Types::STRING, ['notnull' => true]);
-            $table->addColumn('tenant', Types::STRING, ['notnull' => true]);
+            $table->addColumn('response_mode', Types::STRING, ['notnull' => false]);
+            $table->addColumn('response_type', Types::STRING, ['notnull' => false]);
+            $table->addColumn('tenant', Types::STRING, ['notnull' => false]);
         }
 
         return $schema;

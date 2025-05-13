@@ -27,23 +27,17 @@ class IOIDCProviderMapper extends QBMapper
         parent::__construct($db, self::TABLE_NAME);
     }
     /**
-     * @return array
+     * @return IOIDCProvider[]
      */
     public function query(): array
     {
         /**
          * @var IQueryBuilder $qb
-         * */
+         */
         $qb = $this->db->getQueryBuilder();
-        $response = array();
-
-        $query = $qb->select('*')
-            ->from(self::TABLE_NAME);
-        $entities = $this->findEntities($query);
-        foreach ($entities as $entity) {
-            array_push($response, array($entity));
-        }
-        return $entities;
+        $query = $qb->select('p.*')
+            ->from(self::TABLE_NAME, 'p');
+        return  $this->findEntities($query);
     }
     /**
      * @param array $params

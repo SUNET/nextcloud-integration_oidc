@@ -9,9 +9,34 @@ declare(strict_types=1);
 
 namespace OCA\IOIDC\Db;
 
+use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
-class IOIDCUser extends Entity
+/**
+ * @method getAccessToken(): string
+ * @method setAccessToken(string $accessToken): void
+ * @method getEmail(): string
+ * @method setEmail(string $email): void
+ * @method getExpiresIn(): int
+ * @method setExpiresIn(int $expiresIn): void
+ * @method getProviderId(): string
+ * @method setProviderId(string $providerId): void
+ * @method getRefreshToken(): string
+ * @method setRefreshToken(string $refreshToken): void
+ * @method getScope(): string
+ * @method setScope(string $scope): void
+ * @method getSub(): string
+ * @method setSub(string $sub): void
+ * @method getTimestamp(): int
+ * @method setTimestamp(int $timestamp): void
+ * @method getTokenType(): string
+ * @method setTokenType(string $tokenType): void
+ * @method getUid(): string
+ * @method setUid(string $uid): void
+       
+ */
+
+class IOIDCUser extends Entity implements JsonSerializable
 {
     /**
      * @var string $accessToken
@@ -56,15 +81,25 @@ class IOIDCUser extends Entity
 
     public function __construct()
     {
-        $this->addType('accessToken', 'string');
-        $this->addType('email', 'string');
-        $this->addType('expiresIn', 'int');
-        $this->addType('providerId', 'string');
-        $this->addType('refreshToken', 'string');
-        $this->addType('scope', 'string');
-        $this->addType('sub', 'string');
-        $this->addType('timestamp', 'int');
-        $this->addType('tokenType', 'string');
-        $this->addType('uid', 'string');
+        $this->addType('id', 'integer');
+        $this->addType('expires_in', 'integer');
+        $this->addType('timestamp', 'integer');
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'access_token' => $this->accessToken,
+            'email' => $this->email,
+            'expiresIn' => $this->expiresIn,
+            'id' => $this->id,
+            'providerId' => $this->providerId,
+            'refreshToken' => $this->refreshToken,
+            'scope' => $this->scope,
+            'sub' => $this->sub,
+            'timestamp' => $this->timestamp,
+            'tokenType' => $this->tokenType,
+            'uid' => $this->uid,
+        ];
     }
 }

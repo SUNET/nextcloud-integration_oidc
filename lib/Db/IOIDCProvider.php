@@ -9,46 +9,49 @@ declare(strict_types=1);
 
 namespace OCA\IOIDC\Db;
 
+use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * @method ?string getAccessType()
- * @method ?string getDisplay()
- * @method ?string getDomainHint()
- * @method ?string getHd()
- * @method ?string getIncludeGrantedScopes()
- * @method ?string getLoginHint()
- * @method ?string getName()
- * @method ?string getResponseMode()
- * @method ?string getResponseType()
- * @method ?string getTenant()
- * @method string getAuthEndpoint()
- * @method string getClientId()
- * @method string getClientSecret()
- * @method string getPrompt()
- * @method string getScope()
- * @method string getTokenEndpoint()
- * @method string getUserEndpoint()
- * @method void setAccessType(?string $accessType)
- * @method void setAuthEndpoint(string $authEndpoint)
- * @method void setClientId(string $clientId)
- * @method void setClientSecret(string $clientSecret)
- * @method void setDisplay(?string $display)
- * @method void setDomainHint(?string $domainHint)
- * @method void setHd(?string $hd)
- * @method void setIncludeGrantedScopes(?string $includeGrantedScopes)
- * @method void setLoginHint(?string $loginHint)
- * @method void setName(?string $name)
- * @method void setPrompt(string $prompt)
- * @method void setResponseMode(?string $responseMode)
- * @method void setResponseType(?string $responseType)
- * @method void setScope(string $scope)
- * @method void setTenant(?string $tenant)
- * @method void setTokenEndpoint(string $tokenEndpoint)
- * @method void setUserEndpoint(string $userEndpoint)
+ * @method setAccessType(string $accessType): void
+ * @method setAuthEndpoint(string $authEndpoint): void
+ * @method setClientId(string $clientId): void
+ * @method setClientSecret(string $clientSecret): void
+ * @method setDisplay(string $display): void
+ * @method setDomainHint(string $domainHint): void
+ * @method setHd(string $hd): void
+ * @method setIncludeGrantedScopes(string $includeGrantedScopes): void
+ * @method setLoginHint(string $loginHint): void
+ * @method setName(string $name): void
+ * @method setPrompt(string $prompt): void
+ * @method setResponseMode(string $responseMode): void
+ * @method setResponseType(string $responseType): void
+ * @method setRevokeEndpoint(string $revokeEndpoint): void
+ * @method setScope(string $scope): void
+ * @method setTenant(string $tenant): void
+ * @method setTokenEndpoint(string $tokenEndpoint): void
+ * @method setUserEndpoint(string $userEndpoint): void
+ * @method getAccessType(): string
+ * @method getDisplay(): string
+ * @method getDomainHint(): string
+ * @method getHd(): string
+ * @method getIncludeGrantedScopes(): string
+ * @method getLoginHint(): string
+ * @method getName(): string
+ * @method getResponseMode(): string
+ * @method getResponseType(): string
+ * @method getTenant(): string
+ * @method getAuthEndpoint(): string
+ * @method getClientId(): string
+ * @method getClientSecret(): string
+ * @method getPrompt(): string
+ * @method getScope(): string
+ * @method getEndpoint(): string
+ * @method getTokenEndpoint(): string
+ * @method getUserEndpoint(): string
  *
  */
-class IOIDCProvider extends Entity
+class IOIDCProvider extends Entity implements JsonSerializable
 {
     /**
      * @var ?string $accessType
@@ -103,6 +106,10 @@ class IOIDCProvider extends Entity
      */
     protected $responseType;
     /**
+     * @var string $revokeEndpoint
+     */
+    protected $revokeEndpoint;
+    /**
      * @var string $scope
      */
     protected $scope;
@@ -121,23 +128,7 @@ class IOIDCProvider extends Entity
 
     public function __construct()
     {
-        $this->addType('accessType', 'string');
-        $this->addType('authEndpoint', 'string');
-        $this->addType('clientId', 'string');
-        $this->addType('clientSecret', 'string');
-        $this->addType('display', 'string');
-        $this->addType('domainHint', 'string');
-        $this->addType('hd', 'string');
-        $this->addType('includeGrantedScopes', 'string');
-        $this->addType('loginHint', 'string');
-        $this->addType('name', 'string');
-        $this->addType('prompt', 'string');
-        $this->addType('responseMode', 'string');
-        $this->addType('responseType', 'string');
-        $this->addType('scope', 'string');
-        $this->addType('tenant', 'string');
-        $this->addType('tokenEndpoint', 'string');
-        $this->addType('userEndpoint', 'string');
+        $this->addType('id', 'integer');
     }
     /**
      * @param array $params
@@ -145,24 +136,49 @@ class IOIDCProvider extends Entity
      */
     public function setParams(array $params): IOIDCProvider
     {
-        $this->setAccessType($params['accessType']);
-        $this->setAuthEndpoint($params['authEndpoint']);
-        $this->setClientId($params['clientId']);
-        $this->setClientSecret($params['clientSecret']);
+        $this->setAccessType($params['access_type']);
+        $this->setAuthEndpoint($params['auth_endpoint']);
+        $this->setClientId($params['client_id']);
+        $this->setClientSecret($params['client_secret']);
         $this->setDisplay($params['display']);
-        $this->setDomainHint($params['domainHint']);
+        $this->setDomainHint($params['domain_hint']);
         $this->setHd($params['hd']);
-        $this->setIncludeGrantedScopes($params['includeGrantedScopes']);
-        $this->setLoginHint($params['loginHint']);
+        $this->setIncludeGrantedScopes($params['include_granted_scopes']);
+        $this->setLoginHint($params['login_hint']);
         $this->setName($params['name']);
         $this->setPrompt($params['prompt']);
-        $this->setResponseMode($params['responseMode']);
-        $this->setResponseType($params['responseType']);
+        $this->setResponseMode($params['response_mode']);
+        $this->setResponseType($params['response_type']);
+        $this->setRevokeEndpoint($params['revoke_endpoint']);
         $this->setScope($params['scope']);
         $this->setTenant($params['tenant']);
-        $this->setTokenEndpoint($params['tokenEndpoint']);
-        $this->setUserEndpoint($params['userEndpoint']);
+        $this->setTokenEndpoint($params['token_endpoint']);
+        $this->setUserEndpoint($params['user_endpoint']);
 
         return $this;
+    }
+    public function jsonSerialize(): array
+    {
+        $data = array(
+            'accessType' => $this->getAccessType(),
+            'authEndpoint' => $this->getAuthEndpoint(),
+            'clientId' => $this->getClientId(),
+            'clientSecret' => $this->getClientSecret(),
+            'display' => $this->getDisplay(),
+            'domainHint' => $this->getDomainHint(),
+            'hd' => $this->getHd(),
+            'includeGrantedScopes' => $this->getIncludeGrantedScopes(),
+            'loginHint' => $this->getLoginHint(),
+            'name' => $this->getName(),
+            'prompt' => $this->getPrompt(),
+            'responseMode' => $this->getResponseMode(),
+            'responseType' => $this->getResponseType(),
+            'revokeEndpoint' => $this->getRevokeEndpoint(),
+            'scope' => $this->getScope(),
+            'tenant' => $this->getTenant(),
+            'tokenEndpoint' => $this->getTokenEndpoint(),
+            'userEndpoint' => $this->getUserEndpoint(),
+        );
+        return $data;
     }
 }

@@ -35,8 +35,8 @@ class CSPListener implements IEventListener
             return;
         }
         $csp = new ContentSecurityPolicy();
-        foreach ($this->ioidcProviderMapper->query() as $provider) {
-            $url = parse_url($provider['auth_endpoint']);
+        foreach ($this->ioidcProviderMapper-> query() as $provider) {
+            $url = parse_url($provider->getAuthEndpoint());
             $http = $url["scheme"] . "://" . $url["host"];
             $csp->addAllowedFormActionDomain($http);
         }
