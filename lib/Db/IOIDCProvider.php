@@ -167,6 +167,7 @@ class IOIDCProvider extends Entity implements JsonSerializable
             'display' => $this->getDisplay(),
             'domainHint' => $this->getDomainHint(),
             'hd' => $this->getHd(),
+            'id' => $this->getId(),
             'includeGrantedScopes' => $this->getIncludeGrantedScopes(),
             'loginHint' => $this->getLoginHint(),
             'name' => $this->getName(),

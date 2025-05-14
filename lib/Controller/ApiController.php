@@ -13,10 +13,11 @@ use OCP\AppFramework\Http\RedirectResponse;
 use OCP\IRequest;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
+use OCP\IUserSession;
 
 class ApiController extends Controller
 {
-    private $userId;
+    private string $userId;
     private IURLGenerator $urlGenerator;
     private IOIDCUserMapper $ioidcUserMapper;
     private IOIDCProviderMapper $ioidcProviderMapper;
@@ -24,23 +25,23 @@ class ApiController extends Controller
     private Client $client;
     private LoggerInterface $logger;
     public function __construct(
-        string $userId,
         string $appName,
         IRequest $request,
         IURLGenerator $urlGenerator,
         IOIDCUserMapper $ioidcUserMapper,
         IOIDCProviderMapper $ioidcProviderMapper,
         IOIDCStateMapper $ioidcStateMapper,
+        IUserSession $userSession,
         LoggerInterface $logger
     ) {
         parent::__construct($appName, $request);
-        $this->userId = $userId;
         $this->ioidcUserMapper = $ioidcUserMapper;
         $this->ioidcProviderMapper = $ioidcProviderMapper;
         $this->ioidcStateMapper = $ioidcStateMapper;
         $this->logger = $logger;
         $this->urlGenerator = $urlGenerator;
         $this->client = new Client();
+        $this->userId = $userSession->getUser()->getUID();
     }
     /**
      * @NoCSRFRequired
@@ -64,14 +65,14 @@ class ApiController extends Controller
         $response = $this->client->post(
             $token_endpoint,
             [
-            'form_params' => [
-              'client_id' => $client_id,
-              'client_secret' => $client_secret,
-              'grant_type' => 'authorization_code',
-              'code' => $code,
-              'redirect_uri' => $redirect_uri,
+                'form_params' => [
+                    'client_id' => $client_id,
+                    'client_secret' => $client_secret,
+                    'grant_type' => 'authorization_code',
+                    'code' => $code,
+                    'redirect_uri' => $redirect_uri,
+                ]
             ]
-      ]
         );
 
         $body = json_decode($response->getBody()->getContents());
@@ -89,17 +90,17 @@ class ApiController extends Controller
         $sub = $id_obj->sub;
 
         $this->ioidcUserMapper->register_user([
-          'access_token' => $access_token,
-          'email' => $email,
-          'expires_in' => $expires_in,
-          'provider_id' => $provider_id,
-          'refresh_token' => $refresh_token,
-          'prompt' => $prompt,
-          'scope' => $scope,
-          'tenant' => $tenant,
-          'sub' => $sub,
-          'token_type' => $token_type,
-          'uid' => $this->userId
+            'access_token' => $access_token,
+            'email' => $email,
+            'expires_in' => $expires_in,
+            'provider_id' => $provider_id,
+            'refresh_token' => $refresh_token,
+            'prompt' => $prompt,
+            'scope' => $scope,
+            'tenant' => $tenant,
+            'sub' => $sub,
+            'token_type' => $token_type,
+            'uid' => $this->userId
         ]);
 
         $url = $this->urlGenerator->getAbsoluteURL('/index.php/settings/user/connected-accounts');
@@ -173,10 +174,10 @@ class ApiController extends Controller
         $this->client->post(
             $response['revoke_endpoint'],
             [
-            'form_params' => [
-              'token' => $response['refresh_token'],
+                'form_params' => [
+                    'token' => $response['refresh_token'],
+                ]
             ]
-      ]
         );
         $this->ioidcUserMapper->delete_user($params);
         return new DataResponse(['status' => "success"], Http::STATUS_OK);

@@ -85,6 +85,25 @@ class IOIDCUser extends Entity implements JsonSerializable
         $this->addType('expires_in', 'integer');
         $this->addType('timestamp', 'integer');
     }
+    /**
+     * @param array $params
+     * @return IOIDCUser
+     */
+    public function setParams(array $params): IOIDCUser
+    {
+        $this->setAccessToken($params['accessToken']);
+        $this->setEmail($params['email']);
+        $this->setExpiresIn($params['expiresIn']);
+        $this->setRefreshToken($params['refreshToken']);
+        $this->setScope($params['scope']);
+        $this->setSub($params['sub']);
+        $this->setTimestamp($params['timestamp']);
+        $this->setTokenType($params['tokenType']);
+        $this->setProviderId($params['providerId']);
+        $this->setUid($params['uid']);
+
+        return $this;
+    }
 
     public function jsonSerialize(): mixed
     {

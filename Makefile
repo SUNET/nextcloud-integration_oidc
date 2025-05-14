@@ -38,7 +38,7 @@
 #        "build": "node node_modules/gulp-cli/bin/gulp.js"
 #    },
 app_name=integration_oidc
-get_version = $(shell  grep /version $(app_name)/appinfo/info.xml | sed 's/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/')
+get_version = $(shell  grep /version appinfo/info.xml | sed 's/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/')
 cert_dir=$(HOME)/.nextcloud/certificates
 project_dir=$(CURDIR)
 build_dir=$(project_dir)/build/artifacts

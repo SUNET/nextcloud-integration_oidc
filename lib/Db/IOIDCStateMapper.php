@@ -11,6 +11,7 @@ namespace OCA\IOIDC\Db;
 
 use OCP\AppFramework\Db\QBMapper;
 use OCP\IDBConnection;
+use Psr\Log\LoggerInterface;
 
 /**
  * @template-extends QBMapper<IOIDCState>
@@ -18,10 +19,15 @@ use OCP\IDBConnection;
 class IOIDCStateMapper extends QBMapper
 {
     public const TABLE_NAME = 'ioidc_stateconfig';
+    private LoggerInterface $logger;
 
-    public function __construct(IDBConnection $db)
+    public function __construct(
+        IDBConnection $db,
+        LoggerInterface $logger
+    )
     {
         parent::__construct($db, self::TABLE_NAME);
+        $this->logger = $logger;
     }
     /**
      * @param array $params
@@ -29,8 +35,9 @@ class IOIDCStateMapper extends QBMapper
      */
     public function register_state(array $params)
     {
-        $entity = $this->mapRowToEntity($params);
-        $this->insert($entity);
+        $entity = new IOIDCState();
+        $entity->setParams($params);
+        $entity = $this->insert($entity);
         return $entity->getId();
     }
     public function get(int $id): IOIDCState

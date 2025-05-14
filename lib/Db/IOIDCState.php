@@ -13,22 +13,16 @@ use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * @method getCreatedAt(): int
- * @method setCreatedAt($int)
  * @method getProviderId(): string
  * @method setProviderId($string): void
  * @method getState(): string
  * @method setState($string): void
- * @method getUpdatedAt(): int
- * @method setUpdatedAt($int)
+ * @method getUid(): string
+ * @method setUid($string): void
  */
 
 class IOIDCState extends Entity implements JsonSerializable
 {
-    /**
-     * @var $int $createdAt
-     */
-    protected $createdAt;
     /**
      * @var string $uid
      */
@@ -41,27 +35,31 @@ class IOIDCState extends Entity implements JsonSerializable
      * @var string $state
      */
     protected $state;
-    /**
-     * @var $int $updatedAt
-     */
-    protected $updatedAt;
 
     public function __construct()
     {
         $this->addType('id', 'integer');
-        $this->addType('createdAt', 'integer');
-        $this->addType('updatedAt', 'integer');
+    }
+    /**
+     * @param array $params
+     * @return IOIDCState
+     */
+    public function setParams(array $params): IOIDCState
+    {
+        $this->setState($params['state']);
+        $this->setProviderId($params['providerId']);
+        $this->setUid($params['uid']);
+
+        return $this;
     }
 
     public function jsonSerialize(): mixed
     {
         return [
-            'createdAt' => $this->createdAt,
-            'id' => $this->id,
-            'providerId' => $this->providerId,
-            'state' => $this->state,
-            'uid' => $this->uid,
-            'updatedAt' => $this->updatedAt,
+            'id' => $this->getId(),
+            'providerId' => $this->getProviderId(),
+            'state' => $this->getState(),
+            'uid' => $this->getUid(),
         ];
     }
 }

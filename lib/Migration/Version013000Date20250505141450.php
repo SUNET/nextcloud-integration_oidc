@@ -17,7 +17,7 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Create new columns for the integration_oidc app.
  */
-class Version011000Date20250505141450 extends SimpleMigrationStep
+class Version013000Date20250505141450 extends SimpleMigrationStep
 {
     public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper
     {

@@ -35,8 +35,8 @@ class IOIDCProviderMapper extends QBMapper
          * @var IQueryBuilder $qb
          */
         $qb = $this->db->getQueryBuilder();
-        $query = $qb->select('p.*')
-            ->from(self::TABLE_NAME, 'p');
+        $query = $qb->select('*')
+            ->from(self::TABLE_NAME);
         return  $this->findEntities($query);
     }
     /**
