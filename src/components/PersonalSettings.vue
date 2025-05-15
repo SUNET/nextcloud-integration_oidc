@@ -82,6 +82,22 @@ export default {
     };
   },
   methods: {
+    async private_load() {
+      var url = generateUrl("/apps/integration_oidc/query");
+      var result =await axios.get(url);
+      this.available = result.data;
+      console.log("available", this.available);
+      url = generateUrl("/apps/integration_oidc/query_user");
+      result = await axios.get(url);
+      // The configuired providers for this user
+      this.configured = result.data;
+      console.log("configured", this.configured);
+      // All the available not in configured
+      this.unconfigured = this.available.filter(
+        (a) => !this.configured.find((c) => c.id == a.id)
+      );
+      console.log("unconfigured", this.unconfigured);
+    },
     async remove(id) {
       var url = generateUrl("/apps/integration_oidc/remove_user");
       let params = { id: id };
@@ -138,22 +154,7 @@ export default {
     },
   },
   mounted() {
-    var url = generateUrl("/apps/integration_oidc/query");
-    axios.get(url).then((result) => {
-      this.available = result.data;
-      console.log("available", this.available);
-    });
-    url = generateUrl("/apps/integration_oidc/query_user");
-    axios.get(url).then((result) => {
-      // The configuired providers for this user
-      this.configured = result.data;
-      console.log("configured", this.configured);
-      // All the available not in configured
-      this.unconfigured = this.available.filter(
-        (a) => !this.configured.find((c) => c.id == a.id)
-      );
-      console.log("unconfigured", this.unconfigured);
-    });
+    this.private_load().then(() => {});
   },
 };
 </script>
