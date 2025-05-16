@@ -19,35 +19,49 @@ use OCP\IDBConnection;
  */
 class IOIDCProviderMapper extends QBMapper
 {
-    public const TABLE_NAME = 'ioidc_providers';
+  public const TABLE_NAME = 'ioidc_providers';
 
-    public function __construct(
-        IDBConnection $db,
-    ) {
-        parent::__construct($db, self::TABLE_NAME);
-    }
+  public function __construct(
+    IDBConnection $db,
+  ) {
+    parent::__construct($db, self::TABLE_NAME);
+  }
+  /**
+   * @return IOIDCProvider[]
+   */
+  public function query(): array
+  {
     /**
-     * @return IOIDCProvider[]
+     * @var IQueryBuilder $qb
      */
-    public function query(): array
-    {
-        /**
-         * @var IQueryBuilder $qb
-         */
-        $qb = $this->db->getQueryBuilder();
-        $query = $qb->select('*')
-            ->from(self::TABLE_NAME);
-        return  $this->findEntities($query);
-    }
+    $qb = $this->db->getQueryBuilder();
+    $query = $qb->select('*')
+      ->from(self::TABLE_NAME);
+    return  $this->findEntities($query);
+  }
+  /**
+   * @return IOIDCProvider
+   */
+  public function get(int $id): IOIDCProvider
+  {
     /**
-     * @param array $params
-     * @return int
+     * @var IQueryBuilder $qb
      */
-    public function register(array $params): int
-    {
-        $entity = new IOIDCProvider();
-        $entity->setParams($params);
-        $entity = $this->insert($entity);
-        return $entity->getId();
-    }
+    $qb = $this->db->getQueryBuilder();
+    $query = $qb->select('*')
+      ->from(self::TABLE_NAME)
+      ->where($qb->expr()->eq('id', $qb->createNamedParameter($id)));
+    return  $this->findEntity($query);
+  }
+  /**
+   * @param array $params
+   * @return int
+   */
+  public function register(array $params): int
+  {
+    $entity = new IOIDCProvider();
+    $entity->setParams($params);
+    $entity = $this->insert($entity);
+    return $entity->getId();
+  }
 }

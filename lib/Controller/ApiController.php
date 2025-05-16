@@ -157,7 +157,7 @@ class ApiController extends Controller
     public function remove(): DataResponse
     {
         $params = $this->request->getParams();
-        $entity = $this->ioidcStateMapper->get($params['id']);
+        $entity = $this->ioidcProviderMapper->get($params['id']);
         $this->ioidcProviderMapper->delete($entity);
         return new DataResponse(['status' => "success"], Http::STATUS_OK);
     }
@@ -169,8 +169,10 @@ class ApiController extends Controller
     public function removeUser(): DataResponse
     {
         $params = $this->request->getParams();
-        $params['uid'] = $this->userId;
-        $response = $this->ioidcUserMapper->get_refresh_token($params);
+        $response = $this->ioidcUserMapper->get_refresh_token($params['id']);
+        if (!$response) {
+            return new DataResponse(['status' => "error"], Http::STATUS_BAD_REQUEST);
+        }
         $this->client->post(
             $response['revoke_endpoint'],
             [
@@ -179,7 +181,7 @@ class ApiController extends Controller
                 ]
             ]
         );
-        $this->ioidcUserMapper->delete_user($params);
+        $this->ioidcUserMapper->delete_user($params['id']);
         return new DataResponse(['status' => "success"], Http::STATUS_OK);
     }
 }

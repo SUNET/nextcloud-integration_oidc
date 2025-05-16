@@ -84,7 +84,7 @@ export default {
   methods: {
     async private_load() {
       var url = generateUrl("/apps/integration_oidc/query");
-      var result =await axios.get(url);
+      var result = await axios.get(url);
       this.available = result.data;
       console.log("available", this.available);
       url = generateUrl("/apps/integration_oidc/query_user");
