@@ -1,6 +1,6 @@
 publiccodeYmlVersion: "0.4"
 
-name: integration_ioidc
+name: integration_oidc
 url: "https://github.com/SUNET/nextcloud-integration_oidc"
 platforms:
   - web
