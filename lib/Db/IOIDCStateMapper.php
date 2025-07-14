@@ -30,11 +30,20 @@ class IOIDCStateMapper extends QBMapper
     }
     public function delete_userstate(array $params): void
     {
-        $query = $this->db->getQueryBuilder()->select('*')->from(self::TABLE_NAME)
-            ->where('uid = :uid')
-            ->andWhere('provider_id = :provider_id')
-            ->setParameter(':uid', $params['uid'])
-            ->setParameter(':provider_id', $params['provider_id']);
+        $qb = $this->db->getQueryBuilder();
+        $query = $qb->select('*')->from(self::TABLE_NAME)
+            ->where(
+                $qb->expr()->eq(
+                    'uid',
+                    $qb->createNamedParameter($params['uid'])
+                )
+            )
+            ->andWhere(
+                $qb->expr()->eq(
+                    'provider_id',
+                    $qb->createNamedParameter($params['provider_id'])
+                )
+            );
         $entities = $this->findEntities($query);
         foreach ($entities as $entity) {
             $this->delete($entity);
