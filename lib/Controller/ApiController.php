@@ -84,9 +84,28 @@ class ApiController extends Controller
         $scope = $body->scope;
         $token_type = $body->token_type;
         $id_token = $body->id_token;
-        $id_obj = json_decode(base64_decode($id_token));
-        $email = $id_obj->email;
-        $sub = $id_obj->sub;
+
+        // --- JWT decoding ---
+        $jwt_parts = explode('.', $id_token);
+        if (count($jwt_parts) !== 3) {
+            throw new \RuntimeException('Malformed ID token');
+        }
+
+        $payload = $jwt_parts[1];
+        $payload .= str_repeat('=', (4 - strlen($payload) % 4) % 4); // fix padding
+        $payload = strtr($payload, '-_', '+/');
+
+        $id_obj = json_decode(base64_decode($payload));
+        if (!$id_obj) {
+            throw new \RuntimeException('Failed to decode ID token payload');
+        }
+
+        $email = $id_obj->email ?? null;
+        $sub = $id_obj->sub ?? null;
+
+        if (!$sub) {
+            throw new \RuntimeException('Missing "sub" claim in ID token');
+        }
 
         $this->ioidcUserMapper->register_user([
             'accessToken' => $access_token,
