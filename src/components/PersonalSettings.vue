@@ -52,11 +52,11 @@ import Delete from "vue-material-design-icons/Delete.vue";
 
 // Nextcloud components
 import {
-    NcActionButton,
-    NcActions,
-    NcButton,
-    NcListItemIcon,
-    NcSettingsSection
+  NcActionButton,
+  NcActions,
+  NcButton,
+  NcListItemIcon,
+  NcSettingsSection,
 } from "@nextcloud/vue";
 
 // Nextcloud API
@@ -100,7 +100,7 @@ export default {
       } else {
         // All the available not in configured
         this.unconfigured = this.available.filter((a) =>
-          this.configured.find((c) => c.provider_id !== a.id)
+          this.configured.every((c) => c.provider_id !== a.id),
         );
         console.log("unconfigured", this.unconfigured);
       }
