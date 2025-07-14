@@ -51,11 +51,13 @@
 import Delete from "vue-material-design-icons/Delete.vue";
 
 // Nextcloud components
-import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton.js";
-import NcActions from "@nextcloud/vue/dist/Components/NcActions.js";
-import NcButton from "@nextcloud/vue/dist/Components/NcButton.js";
-import NcListItemIcon from "@nextcloud/vue/dist/Components/NcListItemIcon.js";
-import NcSettingsSection from "@nextcloud/vue/dist/Components/NcSettingsSection.js";
+import {
+    NcActionButton,
+    NcActions,
+    NcButton,
+    NcListItemIcon,
+    NcSettingsSection
+} from "@nextcloud/vue";
 
 // Nextcloud API
 import axios from "@nextcloud/axios";

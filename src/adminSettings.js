@@ -6,9 +6,11 @@
  * @copyright Julien Veyssier 2022
  */
 
-import Vue from 'vue'
+import { createApp } from 'vue'
 import AdminSettings from './components/AdminSettings.vue'
-Vue.mixin({ methods: { t, n } })
 
-const View = Vue.extend(AdminSettings)
-new View().$mount('#ioidc_prefs')
+// Mixa in globala metoder (om du fortfarande använder t/n på detta sätt)
+const app = createApp(AdminSettings)
+app.mixin({ methods: { t, n } })
+
+app.mount('#ioidc_prefs')
