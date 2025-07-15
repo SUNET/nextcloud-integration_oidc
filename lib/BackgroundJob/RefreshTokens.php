@@ -34,7 +34,7 @@ class RefreshTokens extends TimedJob
     protected function run($arguments)
     {
         foreach ($this->ioidcUserMapper->get_all_accesstoken() as $token) {
-            $is_expiring = $token['timestamp'] + $token['expires_in'] > time() + $this->interval;
+            $is_expiring = $token['timestamp'] + $token['expires_in'] < time() + $this->interval;
             if ($is_expiring) {
                 $this->logger->info("Refreshing token for {$token['uid']} (expired at " . gmdate('Y-m-d H:i:s', $token['timestamp'] + $token['expires_in']) . ").");
                 $this->refresh_token($token);
