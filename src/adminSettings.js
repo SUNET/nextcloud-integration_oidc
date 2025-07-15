@@ -2,8 +2,8 @@
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the COPYING file.
  *
- * @author Julien Veyssier <julien-nc@posteo.net>
- * @copyright Julien Veyssier 2022
+ * @author Micke Nordin <kano@sunet.se>
+ * @copyright Micke Nordin <kano@sunet.se> 2025
  */
 
 import { createApp } from 'vue'
