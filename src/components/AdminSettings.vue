@@ -34,17 +34,16 @@
             <label for="Name">Name</label>
             <NcTextField
               id="Name"
-              vmodel:value="name"
+              v-model="name"
               :label-outside="true"
               placeholder="Name"
-              @update:value="check"
             />
           </div>
           <div class="external-label">
             <label for="Tenant">Tenant (required for Microsoft)</label>
             <NcTextField
               id="Tenant"
-              vmodel:value="tenant"
+              v-model="tenant"
               :label-outside="true"
               placeholder="Tenant"
               @update:value="set_ms_urls"
@@ -54,47 +53,43 @@
             <label for="AuthEndpoint">Auth Endpoint</label>
             <NcTextField
               id="AuthEndpoint"
-              vmodel:value="auth_endpoint"
+              v-model="auth_endpoint"
               :label-outside="true"
               placeholder="Auth Endpoint"
-              @update:value="check"
             />
           </div>
           <div class="external-label">
             <label for="RevokeEndpoint">Revoke Endpoint</label>
             <NcTextField
               id="RevokeEndpoint"
-              vmodel:value="revoke_endpoint"
+              v-model="revoke_endpoint"
               :label-outside="true"
               placeholder="Revoke Endpoint"
-              @update:value="check"
             />
           </div>
           <div class="external-label">
             <label for="TokenEndpoint">Token Endpoint</label>
             <NcTextField
               id="TokenEndpoint"
-              vmodel:value="token_endpoint"
+              v-model="token_endpoint"
               :label-outside="true"
               placeholder="Token Endpoint"
-              @update:value="check"
             />
           </div>
           <div class="external-label">
             <label for="UserEndpoint">User Endpoint</label>
             <NcTextField
               id="UserEndpoint"
-              vmodel:value="user_endpoint"
+              v-model="user_endpoint"
               :label-outside="true"
               placeholder="User Endpoint"
-              @update:value="check"
             />
           </div>
           <div class="external-label">
             <label for="AccessType">Access Type (optional)</label>
             <NcTextField
               id="AccessType"
-              vmodel:value="access_type"
+              v-model="access_type"
               :label-outside="true"
               placeholder="AccessType"
             />
@@ -103,19 +98,17 @@
             <label for="ClientID">Client ID</label>
             <NcPasswordField
               id="ClientID"
-              vmodel:value="client_id"
+              v-model="client_id"
               :label-outside="true"
               placeholder="Client ID"
-              @update:value="check"
             />
           </div>
           <div class="external-label">
             <label for="ClientSecret">Client Secret</label>
             <NcPasswordField
               id="ClientSecret"
-              vmodel:value="client_secret"
+              v-model="client_secret"
               :label-outside="true"
-              @update:value="check"
               placeholder="Client Secret"
             />
           </div>
@@ -123,7 +116,7 @@
             <label for="Display">Display (optional)</label>
             <NcTextField
               id="Display"
-              vmodel:value="display"
+              v-model="display"
               :label-outside="true"
               placeholder="Display"
             />
@@ -132,7 +125,7 @@
             <label for="HD">HD (optional)</label>
             <NcTextField
               id="HD"
-              vmodel:value="hd"
+              v-model="hd"
               :label-outside="true"
               placeholder="HD"
             />
@@ -143,7 +136,7 @@
             >
             <NcTextField
               id="IncludeGrantedScopes"
-              vmodel:value="include_granted_scopes"
+              v-model="include_granted_scopes"
               :label-outside="true"
               placeholder="Include Granted Scopes"
             />
@@ -152,7 +145,7 @@
             <label for="Prompt">Prompt (optional)</label>
             <NcTextField
               id="Prompt"
-              vmodel:value="prompt"
+              v-model="prompt"
               :label-outside="true"
               placeholder="Prompt"
             />
@@ -161,7 +154,7 @@
             <label for="ResponseMode">Response Mode (optional)</label>
             <NcTextField
               id="ResponseMode"
-              vmodel:value="response_mode"
+              v-model="response_mode"
               :label-outside="true"
               placeholder="Response Mode"
             />
@@ -170,24 +163,22 @@
             <label for="ResponseType">Response Type</label>
             <NcTextField
               id="ResponseType"
-              vmodel:value="response_type"
+              v-model="response_type"
               :label-outside="true"
               placeholder="Response Type"
-              @update:value="check"
             />
           </div>
           <div class="external-label">
             <label for="Scope">Scope</label>
             <NcTextField
               id="Scope"
-              vmodel:value="scope"
+              v-model="scope"
               :label-outside="true"
               placeholder="Scope"
-              @update:value="check"
             />
           </div>
           <NcButton
-            :disabled="true"
+            :disabled="!isValid"
             :readonly="readonly"
             :wide="true"
             text="Save"
@@ -291,25 +282,22 @@ export default {
     const url = generateUrl("/apps/integration_oidc/query");
     axios.get(url).then((result) => (this.configured = result.data));
   },
-  methods: {
-    check() {
-      var button = document.getElementById("Button");
-      if (
-        this.auth_endpoint != "" &&
-        this.client_id != "" &&
-        this.client_secret != "" &&
-        this.name != "" &&
-        this.response_type != "" &&
-        this.revoke_endpoint != "" &&
-        this.scope != "" &&
-        this.token_endpoint != "" &&
-        this.user_endpoint != ""
-      ) {
-        button.disabled = false;
-      } else {
-        button.disabled = true;
-      }
+  computed: {
+    isValid() {
+      return (
+        this.auth_endpoint !== "" &&
+        this.client_id !== "" &&
+        this.client_secret !== "" &&
+        this.name !== "" &&
+        this.response_type !== "" &&
+        this.revoke_endpoint !== "" &&
+        this.scope !== "" &&
+        this.token_endpoint !== "" &&
+        this.user_endpoint !== ""
+      );
     },
+  },
+  methods: {
     async set_ms_urls() {
       if (this.type === "microsoft") {
         this.auth_endpoint =
@@ -462,7 +450,6 @@ export default {
         this.tenant = "";
         this.token_endpoint = "";
         this.user_endpoint = "";
-        this.check();
       }
     },
   },
