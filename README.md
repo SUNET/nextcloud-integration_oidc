@@ -7,6 +7,11 @@ against any oidc provider and collects a refersh token that is used to
 periodically refesh access tokens allowing other apps to use them for integration,
 such as email sync, calendar sync or anything else.
 
+***NOTE***: To be able to use this app, you need to be able to get tokens from a database
+table and use it for something sensible, most likely from another app. This is not
+the app you want if you are looking to login to Nextcloud using a OIDC Provider, or
+use Nextcloud as a OIDC provider for something else.
+
 ## Configuration
 For configuring an oidc provider for gmail, this is a sensible start:
 ```
