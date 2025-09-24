@@ -1,6 +1,6 @@
 {
   "name": "integration_ioidc",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Integration OIDC",
   "author": "Micke Nordin <kano@sunet.se>",
   "homepage": "https://github.com/sunet/nextcloud-integration_ioidc",
