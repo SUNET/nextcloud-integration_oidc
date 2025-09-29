@@ -21,13 +21,10 @@
               @change="select"
               v-model="provider"
             >
-              <option id="Generic" required value="Generic" selected>
-                Generic
-              </option>
+              <option id="Generic" required value="Generic" selected>Generic</option>
               <option id="Google" required value="Google">Google</option>
-              <option id="Microsoft" required value="Microsoft">
-                Microsoft
-              </option>
+              <option id="Microsoft" required value="Microsoft"></option>
+              <option id="Zoom" required value="Zoom">Zoom</option>
             </select>
           </div>
           <div class="external-label">
@@ -47,6 +44,16 @@
               :label-outside="true"
               placeholder="Tenant"
               @update:value="set_ms_urls"
+            />
+          </div>
+          <div class="external-label">
+            <label for="AccountId">Account ID (required for Zoom)</label>
+            <NcTextField
+              id="AccountId"
+              v-model="account_id"
+              :label-outside="true"
+              placeholder="AccountId"
+              @update:value="set_zoom_urls"
             />
           </div>
           <div class="external-label">
@@ -83,6 +90,16 @@
               v-model="user_endpoint"
               :label-outside="true"
               placeholder="User Endpoint"
+            />
+          </div>
+          <div class="external-label">
+            <label for="GrantType">Grant Type (required for Zoom)</label>
+            <NcTextField
+              id="GrantType"
+              v-model="grant_type"
+              :label-outside="true"
+              placeholder="GrantType"
+              @update:value="set_zoom_urls"
             />
           </div>
           <div class="external-label">
@@ -256,6 +273,7 @@ export default {
   data() {
     return {
       access_type: "",
+      account_id: "",
       auth_endpoint: "",
       client_id: "",
       client_secret: "",
@@ -263,6 +281,7 @@ export default {
       documentation_link:
         "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
       display: "",
+      grant_type: "",
       hd: "",
       include_granted_scopes: "",
       name: "",
@@ -314,12 +333,19 @@ export default {
           "/oauth2/v2.0/token";
       }
     },
+    async set_zoom_urls() {
+      if (this.type === "zoom") {
+        this.auth_endpoint = "https://zoom.us/oauth/authorize";
+        this.revoke_endpoint = "https://zoom.us/oauth/revoke";
+        this.token_endpoint = "https://zoom.us/oauth/token";
+      }
+    },
     select(e) {
       var selected = e.target.value;
       var hidden = [];
       switch (selected) {
         case "Google":
-          hidden = ["ResponseMode", "Tenant"];
+          hidden = ["AccountId", "GrantType", "ResponseMode", "Tenant"];
           this.auth_endpoint =
             this.auth_endpoint === ""
               ? "https://accounts.google.com/o/oauth2/v2/auth"
@@ -375,6 +401,42 @@ export default {
               ? "https://graph.microsoft.com/oidc/userinfo"
               : this.user_endpoint;
           this.type = "microsoft";
+          break;
+        case "Zoom":
+          hidden = [
+            "AccessType",
+            "Display",
+            "HD",
+            "IncludeGrantedScopes",
+            "Prompt",
+            "ResponseMode",
+            "Tenant",
+          ];
+          this.auth_endpoint =
+            this.auth_endpoint === ""
+              ? "https://zoom.us/oauth/authorize"
+              : this.auth_endpoint;
+          this.documentation_link =
+            "https://developers.zoom.us/docs/integrations/oauth/";
+          this.response_type =
+            this.response_type === "" ? "code" : this.response_type;
+          this.revoke_endpoint =
+            this.revoke_endpoint === ""
+              ? "https://zoom.us/oauth/revoke"
+              : this.revoke_endpoint;
+          this.scope =
+            this.scope === ""
+              ? "openid profile email offline_access"
+              : this.scope;
+          this.token_endpoint =
+            this.token_endpoint === ""
+              ? "https://zoom.us/oauth/token"
+              : this.token_endpoint;
+          this.user_endpoint =
+            this.user_endpoint === ""
+              ? "https://api.zoom.us/v2/users/me"
+              : this.user_endpoint;
+          this.type = "zoom";
           break;
         default:
           this.documentation_link =

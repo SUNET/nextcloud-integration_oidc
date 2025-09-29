@@ -1,0 +1,100 @@
+calendar:write:calendar:admin
+	
+Create a secondary calendar
+	
+calendar:write:move_event:admin
+	
+Move an event to another calendar
+	
+calendar:update:calendar:admin
+	
+Update a calendar's metadata
+	
+calendar:update:setting:admin
+	
+Update a setting
+	
+calendar:write:stop_channel:admin
+	
+Stop watching resources through this channel
+	
+calendar:delete:event:admin
+	
+Delete an event
+	
+calendar:write:quick_add_event:admin
+	
+Quick create an event
+	
+calendar:write:event:admin
+	
+Create an event
+	
+calendar:write:watch_acl:admin
+	
+Watch for changes to access control rules
+	
+calendar:delete:calendar:admin
+	
+Delete a secondary calendar
+	
+calendar:update:event:admin
+	
+Update an event
+	
+calendar:write:acl:admin
+	
+Create an access control rule
+	
+calendar:write:watch_event:admin
+	
+Watch for changes to Events resources
+	
+calendar:update:acl:admin
+	
+Update an access control rule
+	
+calendar:delete:acl:admin
+	
+Delete an access control rule
+	
+calendar:write:import_event:admin
+	
+Import an event
+	
+View calendar
+calendar:read:list_acl:admin
+	
+View a user's access control rules
+	
+calendar:read:instance_event:admin
+	
+View an event's instances
+	
+calendar:read:calendar:admin
+	
+View a calendar's metadata
+	
+calendar:read:event:admin
+	
+View an event
+	
+calendar:read:calendar_list:admin
+	
+View a user calendar list's calendar
+	
+calendar:read:setting:admin
+	
+View a setting
+	
+calendar:read:acl:admin
+	
+View a user's access control rule (acl)
+	
+calendar:read:color:admin
+	
+View a calendar's event color definitions
+	
+calendar:read:list_events:admin
+	
+View events
