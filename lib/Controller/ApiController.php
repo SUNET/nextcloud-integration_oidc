@@ -81,7 +81,7 @@ class ApiController extends Controller
         $access_token = $body->access_token;
         $expires_in = $body->expires_in;
         $refresh_token = $body->refresh_token;
-        $scope = $body->scope;
+        $scope = $body->scope ?? '';
         $token_type = $body->token_type;
         $id_token = $body->id_token;
 

@@ -97,7 +97,7 @@ class RefreshTokens extends TimedJob
 
     $access_token = $body['access_token'];
     $expires_in = $body['expires_in'];
-    $scope = $body['scope'];
+    $scope = $body['scope'] ?? '';
     $token_type = $body['token_type'];
 
     $this->logger->info("Received new token for {$uid}, expires in {$expires_in} seconds");
