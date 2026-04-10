@@ -35,6 +35,6 @@
     "vue-material-design-icons": "^5.3.1"
   },
   "devDependencies": {
-    "@nextcloud/webpack-vue-config": "^6.2.0"
+    "@nextcloud/webpack-vue-config": "^7.0.2"
   }
 }

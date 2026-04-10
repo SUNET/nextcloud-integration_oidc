@@ -12,6 +12,7 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\IRequest;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Log\LoggerInterface;
 use OCP\IUserSession;
 
@@ -62,6 +63,8 @@ class ApiController extends Controller
 
         $redirect_uri = $this->urlGenerator->getAbsoluteURL('/index.php/apps/integration_oidc/callback');
 
+        $url = $this->urlGenerator->getAbsoluteURL('/index.php/settings/user/connected-accounts');
+
         $payload = ['form_params' => [
             'client_id' => $client_id,
             'client_secret' => $client_secret,
@@ -69,10 +72,15 @@ class ApiController extends Controller
             'code' => $code,
             'redirect_uri' => $redirect_uri,
         ]];
-        $response = $this->client->post(
-            $token_endpoint,
-            $payload
-        );
+        try {
+            $response = $this->client->post(
+                $token_endpoint,
+                $payload
+            );
+        } catch (GuzzleException $e) {
+            $this->logger->error('Token exchange failed for provider ' . $provider_id . ': ' . $e->getMessage());
+            return new RedirectResponse($url);
+        }
 
         $provider = $this->ioidcProviderMapper->get($provider_id);
         $this->logger->debug('provider: ' . print_r($provider, true));
@@ -120,7 +128,6 @@ class ApiController extends Controller
             'uid' => $this->userId
         ]);
 
-        $url = $this->urlGenerator->getAbsoluteURL('/index.php/settings/user/connected-accounts');
         return new RedirectResponse($url, Http::STATUS_OK);
     }
     /**
@@ -154,6 +161,19 @@ class ApiController extends Controller
         $id = $this->ioidcProviderMapper->register($params);
         $response = ['status' => "success", "id" => $id];
         return new DataResponse($response, Http::STATUS_OK);
+    }
+    /**
+     * @NoCSRFRequired
+     *
+     * @return DataResponse
+     **/
+    public function update(): DataResponse
+    {
+        $params = $this->request->getParams();
+        $entity = $this->ioidcProviderMapper->get($params['id']);
+        $entity->setParams($params);
+        $this->ioidcProviderMapper->update($entity);
+        return new DataResponse(['status' => "success"], Http::STATUS_OK);
     }
     /**
      * @NoCSRFRequired

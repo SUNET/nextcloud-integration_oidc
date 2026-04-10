@@ -194,20 +194,29 @@
               placeholder="Scope"
             />
           </div>
-          <NcButton
-            :disabled="!isValid"
-            :readonly="readonly"
-            :wide="true"
-            text="Save"
-            @click="register"
-            :nativeType="submit"
-            id="Button"
-          >
-            <template #icon>
-              <Check :size="20" id="Icon" />
-            </template>
-            Save
-          </NcButton>
+          <div class="button-row">
+            <NcButton
+              :disabled="!isValid"
+              :readonly="readonly"
+              :wide="true"
+              @click="save"
+              :nativeType="submit"
+              id="Button"
+            >
+              <template #icon>
+                <Check :size="20" id="Icon" />
+              </template>
+              {{ editingId ? 'Update' : 'Save' }}
+            </NcButton>
+            <NcButton
+              v-if="editingId"
+              :wide="true"
+              type="tertiary"
+              @click="cancelEdit"
+            >
+              Cancel
+            </NcButton>
+          </div>
         </form>
         <div id="oidc-configured">
           <ul id="oidc-configured-list">
@@ -218,6 +227,12 @@
               v-bind:key="i.id"
             >
               <NcActions>
+                <NcActionButton @click="(_) => edit(i)">
+                  <template #icon>
+                    <Pencil :size="20" />
+                  </template>
+                  Edit
+                </NcActionButton>
                 <NcActionButton @click="(_) => remove(i.id)">
                   <template #icon>
                     <Delete :size="20" />
@@ -278,6 +293,7 @@ export default {
       client_id: "",
       client_secret: "",
       configured: [],
+      editingId: null,
       documentation_link:
         "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
       display: "",
@@ -462,28 +478,20 @@ export default {
         }
       }
     },
-    async remove(id) {
-      const url = generateUrl("/apps/integration_oidc/remove");
-      let res = await axios.post(url, { id: id });
-      console.log(res, id);
-      if (res.data.status == "success") {
-        this.configured = this.configured.filter((item) => item.id != id);
-      }
-    },
-    async register() {
-      const url = generateUrl("/apps/integration_oidc/register");
-      var payload = {
+    getPayload() {
+      return {
         access_type: this.access_type,
         auth_endpoint: this.auth_endpoint,
         client_id: this.client_id,
         client_secret: this.client_secret,
         display: this.display,
+        domain_hint: '',
         hd: this.hd,
         include_granted_scopes: this.include_granted_scopes,
+        login_hint: '',
         name: this.name,
         prompt: this.prompt,
         revoke_endpoint: this.revoke_endpoint,
-        response_endpoint: this.response_endpoint,
         response_mode: this.response_mode,
         response_type: this.response_type,
         scope: this.scope,
@@ -491,27 +499,84 @@ export default {
         token_endpoint: this.token_endpoint,
         user_endpoint: this.user_endpoint,
       };
+    },
+    clearForm() {
+      this.access_type = "";
+      this.auth_endpoint = "";
+      this.client_id = "";
+      this.client_secret = "";
+      this.display = "";
+      this.editingId = null;
+      this.hd = "";
+      this.include_granted_scopes = "";
+      this.name = "";
+      this.prompt = "";
+      this.revoke_endpoint = "";
+      this.response_mode = "";
+      this.response_type = "";
+      this.scope = "";
+      this.tenant = "";
+      this.token_endpoint = "";
+      this.user_endpoint = "";
+    },
+    async save() {
+      if (this.editingId) {
+        await this.update();
+      } else {
+        await this.register();
+      }
+    },
+    edit(provider) {
+      this.editingId = provider.id;
+      this.access_type = provider.accessType ?? provider.access_type ?? '';
+      this.auth_endpoint = provider.authEndpoint ?? provider.auth_endpoint ?? '';
+      this.client_id = provider.clientId ?? provider.client_id ?? '';
+      this.client_secret = provider.clientSecret ?? provider.client_secret ?? '';
+      this.display = provider.display ?? '';
+      this.hd = provider.hd ?? '';
+      this.include_granted_scopes = provider.includeGrantedScopes ?? provider.include_granted_scopes ?? '';
+      this.name = provider.name ?? '';
+      this.prompt = provider.prompt ?? '';
+      this.response_mode = provider.responseMode ?? provider.response_mode ?? '';
+      this.response_type = provider.responseType ?? provider.response_type ?? '';
+      this.revoke_endpoint = provider.revokeEndpoint ?? provider.revoke_endpoint ?? '';
+      this.scope = provider.scope ?? '';
+      this.tenant = provider.tenant ?? '';
+      this.token_endpoint = provider.tokenEndpoint ?? provider.token_endpoint ?? '';
+      this.user_endpoint = provider.userEndpoint ?? provider.user_endpoint ?? '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    cancelEdit() {
+      this.clearForm();
+    },
+    async remove(id) {
+      const url = generateUrl("/apps/integration_oidc/remove");
+      let res = await axios.post(url, { id: id });
+      if (res.data.status == "success") {
+        this.configured = this.configured.filter((item) => item.id != id);
+      }
+    },
+    async register() {
+      const url = generateUrl("/apps/integration_oidc/register");
+      var payload = this.getPayload();
       let res = await axios.post(url, payload);
       if (res.data.status == "success") {
         payload.id = res.data.id;
-        this.access_type = "";
-        this.auth_endpoint = "";
-        this.client_id = "";
-        this.client_secret = "";
         this.configured.push(payload);
-        this.display = "";
-        this.hd = "";
-        this.include_granted_scopes = "";
-        this.name = "";
-        this.prompt = "";
-        this.revoke_endpoint = "";
-        this.response_endpoint = "";
-        this.response_mode = "";
-        this.response_type = "";
-        this.scope = "";
-        this.tenant = "";
-        this.token_endpoint = "";
-        this.user_endpoint = "";
+        this.clearForm();
+      }
+    },
+    async update() {
+      const url = generateUrl("/apps/integration_oidc/update");
+      var payload = this.getPayload();
+      payload.id = this.editingId;
+      let res = await axios.post(url, payload);
+      if (res.data.status == "success") {
+        const index = this.configured.findIndex((item) => item.id === this.editingId);
+        if (index !== -1) {
+          this.configured[index] = payload;
+        }
+        this.clearForm();
       }
     },
   },

@@ -18,6 +18,7 @@ return [
     ['name' => 'api#callback', 'url' => '/callback', 'verb' => 'GET'],
     ['name' => 'api#query', 'url' => '/query', 'verb' => 'GET'],
     ['name' => 'api#register', 'url' => '/register', 'verb' => 'POST'],
+    ['name' => 'api#update', 'url' => '/update', 'verb' => 'POST'],
     ['name' => 'api#remove', 'url' => '/remove', 'verb' => 'POST'],
     ['name' => 'api#query_user', 'url' => '/query_user', 'verb' => 'GET'],
     ['name' => 'api#remove_user', 'url' => '/remove_user', 'verb' => 'POST'],
