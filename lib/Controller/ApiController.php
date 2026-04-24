@@ -65,12 +65,16 @@ class ApiController extends Controller
 
         $url = $this->urlGenerator->getAbsoluteURL('/index.php/settings/user/connected-accounts');
 
+        $provider = $this->ioidcProviderMapper->get($provider_id);
+        $this->logger->debug('provider: ' . print_r($provider, true));
+
         $payload = ['form_params' => [
             'client_id' => $client_id,
             'client_secret' => $client_secret,
             'grant_type' => 'authorization_code',
             'code' => $code,
             'redirect_uri' => $redirect_uri,
+            'scope' => $provider->getScope(),
         ]];
         try {
             $response = $this->client->post(
@@ -81,9 +85,6 @@ class ApiController extends Controller
             $this->logger->error('Token exchange failed for provider ' . $provider_id . ': ' . $e->getMessage());
             return new RedirectResponse($url);
         }
-
-        $provider = $this->ioidcProviderMapper->get($provider_id);
-        $this->logger->debug('provider: ' . print_r($provider, true));
         $body = json_decode($response->getBody()->getContents());
         $this->logger->debug('body: ' . print_r($body, true));
         $access_token = $body->access_token;
