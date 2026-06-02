@@ -1,5 +1,6 @@
 <template>
-	<span :aria-hidden="!title"
+	<span
+		:aria-hidden="!title"
 		:aria-label="title"
 		class="material-design-icon ioidc-icon"
 		role="img"
@@ -21,20 +22,22 @@
 
 <script>
 export default {
-	name: 'IOIDCIcon',
-	props: {
-		title: {
-			type: String,
-			default: '',
-		},
-		fillColor: {
-			type: String,
-			default: 'currentColor',
-		},
-		size: {
-			type: Number,
-			default: 24,
-		},
-	},
+  name: 'IOIDCIcon',
+  props: {
+    title: {
+      type: String,
+      default: '',
+    },
+
+    fillColor: {
+      type: String,
+      default: 'currentColor',
+    },
+
+    size: {
+      type: Number,
+      default: 24,
+    },
+  },
 }
 </script>
