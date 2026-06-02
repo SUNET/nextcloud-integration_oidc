@@ -9,27 +9,26 @@ use OCP\Settings\ISettings;
 
 class PersonalSettings implements ISettings
 {
-  public function __construct(
-    private IInitialState $initialStateService,
-  ) {
-  }
+    public function __construct(
+        private IInitialState $initialStateService,
+    ) {}
 
-  /**
-   * @return TemplateResponse
-   */
-  public function getForm(): TemplateResponse
-  {
-    //$this->initialStateService->provideInitialState('admin-config', $adminConfig);
-    return new TemplateResponse(Application::APP_ID, 'personalSettings');
-  }
+    /**
+     * @return TemplateResponse
+     */
+    public function getForm(): TemplateResponse
+    {
+        //$this->initialStateService->provideInitialState('admin-config', $adminConfig);
+        return new TemplateResponse(Application::APP_ID, 'personalSettings');
+    }
 
-  public function getSection(): string
-  {
-    return 'connected-accounts';
-  }
+    public function getSection(): string
+    {
+        return 'connected-accounts';
+    }
 
-  public function getPriority(): int
-  {
-    return 10;
-  }
+    public function getPriority(): int
+    {
+        return 10;
+    }
 }

@@ -1,0 +1,72 @@
+#!/bin/sh
+# SPDX-FileCopyrightText: 2025 Mikael Nordin <kano@sunet.se>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Pre-push hook: format the PHP files that are about to be pushed with
+# php-cs-fixer. If any file needed reformatting, the push is aborted so the
+# formatting can be committed (commits being pushed cannot be edited here).
+#
+# Enable once per clone with:
+#   git config core.hooksPath .githooks      (or: make hooks)
+#
+# No `set -e`: a non-zero pipeline/subshell status would otherwise abort the
+# push with no message.
+set -u
+
+# App directory within the repo (where composer.json + the config live).
+APP_DIR="."
+
+ROOT=$(git rev-parse --show-toplevel) || exit 0
+APP="$ROOT/$APP_DIR"
+
+FIXER="$APP/vendor/bin/php-cs-fixer"
+if [ ! -x "$FIXER" ]; then
+  echo "pre-push: $FIXER not found — run 'composer install' in $APP_DIR first." >&2
+  exit 1
+fi
+
+ZERO=0000000000000000000000000000000000000000
+changed=""
+
+# stdin lines: <local ref> <local sha> <remote ref> <remote sha>
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$ZERO" ] && continue
+  if [ "$remote_sha" = "$ZERO" ]; then
+    base=$(git merge-base "$local_sha" origin/main 2>/dev/null || true)
+    range=${base:+$base..}$local_sha
+  else
+    range="$remote_sha..$local_sha"
+  fi
+  more=$(git diff --name-only --diff-filter=ACMR "$range" -- "$APP_DIR/lib" 2>/dev/null | grep '\.php$')
+  if [ -n "$more" ]; then
+    changed="$changed
+$more"
+  fi
+done
+
+# Unique, still-existing files (root-relative); build an absolute list too.
+relfiles=""
+for f in $(printf '%s\n' "$changed" | sort -u); do
+  [ -n "$f" ] && [ -f "$ROOT/$f" ] && relfiles="$relfiles $f"
+done
+[ -z "$relfiles" ] && exit 0
+
+absfiles=""
+for f in $relfiles; do
+  absfiles="$absfiles $ROOT/$f"
+done
+
+# Run from the app dir so the config (and its vendor/autoload) resolve.
+cd "$APP" || exit 0
+# shellcheck disable=SC2086
+"$FIXER" fix --using-cache=no --quiet $absfiles
+
+# shellcheck disable=SC2086
+if ! git -C "$ROOT" diff --quiet -- $relfiles; then
+  echo "pre-push: php-cs-fixer reformatted files that were about to be pushed:" >&2
+  # shellcheck disable=SC2086
+  git -C "$ROOT" --no-pager diff --name-only -- $relfiles | sed 's/^/  /' >&2
+  echo "Review the changes, commit them, then push again." >&2
+  exit 1
+fi
+exit 0

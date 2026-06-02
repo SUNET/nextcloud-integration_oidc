@@ -169,3 +169,12 @@ distclean: clean
 test: composer
 	$(project_dir)/vendor/phpunit/phpunit/phpunit -c $(project_dir)/phpunit.xml
 	$(project_dir)/vendor/phpunit/phpunit/phpunit -c $(project_dir)/phpunit.integration.xml
+
+.PHONY: lint
+lint: composer
+	$(project_dir)/vendor/bin/php-cs-fixer fix --dry-run --diff
+
+.PHONY: hooks
+hooks:
+	git config core.hooksPath .githooks
+	@echo "Git hooks enabled (core.hooksPath = .githooks)."

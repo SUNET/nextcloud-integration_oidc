@@ -35,7 +35,7 @@ use OCP\AppFramework\Db\Entity;
  * @method setTokenType(string $tokenType): void
  * @method getUid(): string
  * @method setUid(string $uid): void
-       
+
  */
 
 class IOIDCUser extends Entity implements JsonSerializable

@@ -15,17 +15,15 @@ use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 
 class Application extends App implements IBootstrap
 {
-  public const APP_ID = 'integration_oidc';
+    public const APP_ID = 'integration_oidc';
 
-  public function __construct()
-  {
-    parent::__construct(self::APP_ID);
-  }
-  public function register(IRegistrationContext $context): void
-  {
-    $context->registerEventListener(AddContentSecurityPolicyEvent::class, CSPListener::class);
-  }
-  public function boot(IBootContext $context): void
-  {
-  }
+    public function __construct()
+    {
+        parent::__construct(self::APP_ID);
+    }
+    public function register(IRegistrationContext $context): void
+    {
+        $context->registerEventListener(AddContentSecurityPolicyEvent::class, CSPListener::class);
+    }
+    public function boot(IBootContext $context): void {}
 }

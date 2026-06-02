@@ -25,8 +25,7 @@ class CSPListener implements IEventListener
     public function __construct(
         private IOIDCProviderMapper $ioidcProviderMapper,
         private LoggerInterface $logger
-    ) {
-    }
+    ) {}
 
     public function handle(Event $event): void
     {
