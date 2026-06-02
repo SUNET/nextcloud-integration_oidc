@@ -14,7 +14,7 @@
 						:disabled="false"
 						:readonly="readonly"
 						:wide="true"
-						:nativeType="submit"
+						nativeType="submit"
 						:text="i.name"
 						@click="(_) => register(i.id)">
 						{{ i.name }}
@@ -85,6 +85,11 @@ export default {
   },
 
   methods: {
+    // Entry point shared by mounted() and the section's @default handler.
+    async populate() {
+      await this.private_load()
+    },
+
     async private_load() {
       let url = generateUrl('/apps/integration_oidc/query')
       let result = await axios.get(url)
@@ -92,7 +97,7 @@ export default {
       console.log('available', this.available)
       url = generateUrl('/apps/integration_oidc/query_user')
       result = await axios.get(url)
-      // The configuired providers for this user
+      // The configured providers for this user
       this.configured = result.data
       console.log('configured', this.configured)
       if (this.configured.length === 0) {

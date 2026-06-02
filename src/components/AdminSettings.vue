@@ -8,7 +8,7 @@
 				@default="populate">
 				<p>
 					Explanations for the parameters are
-					<a :href="documentation_link" target="_blank">documented here</a>.
+					<a :href="documentation_link" target="_blank" rel="noopener noreferrer">documented here</a>.
 					Note that some parameters are provider specific.
 				</p>
 				<form id="ioidc-form" @submit.prevent="save">
@@ -29,7 +29,9 @@
 							<option id="Google" required value="Google">
 								Google
 							</option>
-							<option id="Microsoft" required value="Microsoft" />
+							<option id="Microsoft" required value="Microsoft">
+								Microsoft
+							</option>
 							<option id="Zoom" required value="Zoom">
 								Zoom
 							</option>
@@ -188,7 +190,7 @@
 							:disabled="!isValid"
 							:readonly="readonly"
 							:wide="true"
-							:nativeType="submit"
+							nativeType="submit"
 							@click="save">
 							<template #icon>
 								<Check id="Icon" :size="20" />
@@ -316,11 +318,17 @@ export default {
   },
 
   mounted() {
-    const url = generateUrl('/apps/integration_oidc/query')
-    axios.get(url).then((result) => (this.configured = result.data))
+    this.populate()
   },
 
   methods: {
+    // Load the configured providers. Shared by mounted() and the section's
+    // @default handler so both code paths stay in sync.
+    populate() {
+      const url = generateUrl('/apps/integration_oidc/query')
+      axios.get(url).then((result) => (this.configured = result.data))
+    },
+
     async set_ms_urls() {
       if (this.type === 'microsoft') {
         this.auth_endpoint
