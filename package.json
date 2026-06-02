@@ -35,6 +35,8 @@
     "vue-material-design-icons": "^5.3.1"
   },
   "devDependencies": {
+    "@nextcloud/eslint-config": "^9.0.0-rc.5",
+    "@nextcloud/stylelint-config": "^2.4.0",
     "@nextcloud/webpack-vue-config": "^7.0.2"
   }
 }

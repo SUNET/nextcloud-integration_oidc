@@ -132,7 +132,6 @@ class ApiController extends Controller
         return new RedirectResponse($url, Http::STATUS_OK);
     }
     /**
-     * @NoCSRFRequired
      * @NoAdminRequired
      * @return DataResponse
      **/
@@ -142,7 +141,6 @@ class ApiController extends Controller
         return new DataResponse($response, Http::STATUS_OK);
     }
     /**
-     * @NoCSRFRequired
      * @NoAdminRequired
      * @return DataResponse
      **/
@@ -152,8 +150,6 @@ class ApiController extends Controller
         return new DataResponse($response, Http::STATUS_OK);
     }
     /**
-     * @NoCSRFRequired
-     *
      * @return DataResponse
      **/
     public function register(): DataResponse
@@ -164,8 +160,6 @@ class ApiController extends Controller
         return new DataResponse($response, Http::STATUS_OK);
     }
     /**
-     * @NoCSRFRequired
-     *
      * @return DataResponse
      **/
     public function update(): DataResponse
@@ -177,7 +171,6 @@ class ApiController extends Controller
         return new DataResponse(['status' => "success"], Http::STATUS_OK);
     }
     /**
-     * @NoCSRFRequired
      * @NoAdminRequired
      * @return DataResponse
      **/
@@ -190,8 +183,6 @@ class ApiController extends Controller
         return new DataResponse($response, Http::STATUS_OK);
     }
     /**
-     * @NoCSRFRequired
-     *
      * @return DataResponse
      **/
     public function remove(): DataResponse
@@ -202,7 +193,6 @@ class ApiController extends Controller
         return new DataResponse(['status' => "success"], Http::STATUS_OK);
     }
     /**
-     * @NoCSRFRequired
      * @NoAdminRequired
      * @return DataResponse
      **/
