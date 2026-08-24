@@ -1,5 +1,5 @@
 #!/bin/sh
-# SPDX-FileCopyrightText: 2025 Mikael Nordin <kano@sunet.se>
+# SPDX-FileCopyrightText: 2025 Micke Nordin <kano@sunet.se>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
 # Pre-push hook: format the PHP files that are about to be pushed with

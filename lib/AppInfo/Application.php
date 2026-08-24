@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-// SPDX-FileCopyrightText: Mikael Nordin <kano@sunet.se>
+// SPDX-FileCopyrightText: Micke Nordin <kano@sunet.se>
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 namespace OCA\IOIDC\AppInfo;
@@ -12,6 +12,8 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
+
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 class Application extends App implements IBootstrap
 {

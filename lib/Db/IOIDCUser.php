@@ -18,11 +18,17 @@ use OCP\AppFramework\Db\Entity;
  * @method getCode(): string
  * @method setCode(string $accessToken): void
  * @method getEmail(): string
- * @method setEmail(string $email): void
+ * @method setEmail(?string $email): void
  * @method getExpiresIn(): int
  * @method setExpiresIn(int $expiresIn): void
  * @method getProviderId(): string
  * @method setProviderId(string $providerId): void
+ * @method getProviderVersion(): int
+ * @method setProviderVersion(int $providerVersion): void
+ * @method getRevision(): int
+ * @method setRevision(int $revision): void
+ * @method getConnectionKey(): ?string
+ * @method setConnectionKey(?string $connectionKey): void
  * @method getRefreshToken(): string
  * @method setRefreshToken(string $refreshToken): void
  * @method getScope(): string
@@ -49,7 +55,7 @@ class IOIDCUser extends Entity implements JsonSerializable
      */
     protected $code;
     /**
-     * @var string email
+     * @var ?string email
      */
     protected $email;
     /**
@@ -60,6 +66,12 @@ class IOIDCUser extends Entity implements JsonSerializable
      * @var string  $idProvider
      */
     protected $providerId;
+    /** @var int */
+    protected $providerVersion;
+    /** @var int */
+    protected $revision;
+    /** @var ?string */
+    protected $connectionKey;
     /**
      * @var string $refreshToken
      */
@@ -88,8 +100,10 @@ class IOIDCUser extends Entity implements JsonSerializable
     public function __construct()
     {
         $this->addType('id', 'integer');
-        $this->addType('expires_in', 'integer');
+        $this->addType('expiresIn', 'integer');
         $this->addType('timestamp', 'integer');
+        $this->addType('providerVersion', 'integer');
+        $this->addType('revision', 'integer');
     }
     /**
      * @param array $params
@@ -106,6 +120,7 @@ class IOIDCUser extends Entity implements JsonSerializable
         $this->setTimestamp($params['timestamp']);
         $this->setTokenType($params['tokenType']);
         $this->setProviderId($params['providerId']);
+        $this->setProviderVersion($params['providerVersion']);
         $this->setUid($params['uid']);
 
         return $this;
@@ -114,12 +129,12 @@ class IOIDCUser extends Entity implements JsonSerializable
     public function jsonSerialize(): mixed
     {
         return [
-            'access_token' => $this->accessToken,
             'email' => $this->email,
             'expiresIn' => $this->expiresIn,
             'id' => $this->id,
             'providerId' => $this->providerId,
-            'refreshToken' => $this->refreshToken,
+            'hasAccessToken' => is_string($this->accessToken) && $this->accessToken !== '',
+            'hasRefreshToken' => is_string($this->refreshToken) && $this->refreshToken !== '',
             'scope' => $this->scope,
             'sub' => $this->sub,
             'timestamp' => $this->timestamp,

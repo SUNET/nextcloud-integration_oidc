@@ -46,6 +46,14 @@
 							placeholder="Name" />
 					</div>
 					<div class="external-label">
+						<label for="Issuer">Issuer</label>
+						<NcTextField
+							id="Issuer"
+							v-model="issuer"
+							:labelOutside="true"
+							placeholder="Issuer" />
+					</div>
+					<div class="external-label">
 						<label for="Tenant">Tenant (required for Microsoft)</label>
 						<NcTextField
 							id="Tenant"
@@ -126,7 +134,7 @@
 							id="ClientSecret"
 							v-model="client_secret"
 							:labelOutside="true"
-							placeholder="Client Secret" />
+							:placeholder="clientSecretPlaceholder" />
 					</div>
 					<div class="external-label">
 						<label for="Display">Display (optional)</label>
@@ -212,7 +220,7 @@
 							v-for="i in configured"
 							:key="i.id"
 							:name="i.name"
-							:subname="i.token_endpoint">
+							:subname="i.tokenEndpoint">
 							<NcActions>
 								<NcActionButton @click="(_) => edit(i)">
 									<template #icon>
@@ -280,6 +288,7 @@ export default {
       client_secret: '',
       configured: [],
       editingId: null,
+      hasClientSecret: false,
       documentation_link:
         'https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest',
 
@@ -287,6 +296,7 @@ export default {
       grant_type: '',
       hd: '',
       include_granted_scopes: '',
+      issuer: '',
       name: '',
       prompt: '',
       provider: 'Generic',
@@ -302,17 +312,23 @@ export default {
   },
 
   computed: {
+    clientSecretPlaceholder() {
+      if (this.editingId === null) {
+        return 'Client Secret'
+      }
+
+      return this.hasClientSecret
+        ? 'Leave blank to keep current secret'
+        : 'No current secret; enter one to configure it'
+    },
+
     isValid() {
       return (
-        this.auth_endpoint !== ''
-        && this.client_id !== ''
-        && this.client_secret !== ''
+        this.client_id !== ''
+        && ((this.editingId !== null && this.hasClientSecret) || this.client_secret !== '')
+        && this.issuer !== ''
         && this.name !== ''
-        && this.response_type !== ''
-        && this.revoke_endpoint !== ''
         && this.scope !== ''
-        && this.token_endpoint !== ''
-        && this.user_endpoint !== ''
       )
     },
   },
@@ -324,21 +340,23 @@ export default {
   methods: {
     // Load the configured providers. Shared by mounted() and the section's
     // @default handler so both code paths stay in sync.
-    populate() {
+    async populate() {
       const url = generateUrl('/apps/integration_oidc/query')
-      axios.get(url).then((result) => (this.configured = result.data))
+      const result = await axios.get(url)
+      this.configured = result.data
     },
 
     async set_ms_urls() {
       if (this.type === 'microsoft') {
+        this.issuer = this.tenant === ''
+          ? ''
+          : 'https://login.microsoftonline.com/' + this.tenant + '/v2.0'
         this.auth_endpoint
           = 'https://login.microsoftonline.com/'
           + this.tenant
           + '/oauth2/v2.0/authorize'
         this.revoke_endpoint
-          = 'https://login.microsoftonline.com/'
-          + this.tenant
-          + '/oauth2/v2.0/logout'
+          = ''
         this.token_endpoint
           = 'https://login.microsoftonline.com/'
           + this.tenant
@@ -366,6 +384,7 @@ export default {
               : this.auth_endpoint
           this.documentation_link
             = 'https://developers.google.com/identity/openid-connect/openid-connect#authenticationuriparameters'
+          this.issuer = 'https://accounts.google.com'
           this.prompt = this.prompt === '' ? 'consent' : this.prompt
           this.response_type
             = this.response_type === '' ? 'code' : this.response_type
@@ -395,13 +414,14 @@ export default {
               : this.auth_endpoint
           this.documentation_link
             = 'https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc#send-the-sign-in-request'
+          this.issuer = this.tenant === ''
+            ? ''
+            : 'https://login.microsoftonline.com/' + this.tenant + '/v2.0'
           this.prompt = this.prompt === '' ? 'consent' : this.prompt
           this.response_type
-            = this.response_type === '' ? 'code id_token' : this.response_type
+            = 'code'
           this.revoke_endpoint
-            = this.revoke_endpoint === ''
-              ? 'https://login.microsoftonline.com/common/oauth2/v2.0/logout'
-              : this.revoke_endpoint
+            = ''
           this.scope
             = this.scope === ''
               ? 'openid profile email offline_access'
@@ -432,6 +452,7 @@ export default {
               : this.auth_endpoint
           this.documentation_link
             = 'https://developers.zoom.us/docs/integrations/oauth/'
+          this.issuer = 'https://zoom.us'
           this.response_type
             = this.response_type === '' ? 'code' : this.response_type
           this.revoke_endpoint
@@ -462,14 +483,11 @@ export default {
       for (let i = 0; i < form.length; i++) {
         const input = form[i]
         const label = document.querySelector('label[for="' + input.id + '"]')
-        console.log(input.id)
         if (input.id) {
           if (hidden.includes(input.id)) {
-            console.log('hidden')
             input.parentNode.style.display = 'none'
             label.style.display = 'none'
           } else {
-            console.log('visible')
             input.parentNode.style.display = 'block'
             label.style.display = 'block'
           }
@@ -487,6 +505,7 @@ export default {
         domain_hint: '',
         hd: this.hd,
         include_granted_scopes: this.include_granted_scopes,
+        issuer: this.issuer,
         login_hint: '',
         name: this.name,
         prompt: this.prompt,
@@ -507,8 +526,10 @@ export default {
       this.client_secret = ''
       this.display = ''
       this.editingId = null
+      this.hasClientSecret = false
       this.hd = ''
       this.include_granted_scopes = ''
+      this.issuer = ''
       this.name = ''
       this.prompt = ''
       this.revoke_endpoint = ''
@@ -521,7 +542,7 @@ export default {
     },
 
     async save() {
-      if (this.editingId) {
+      if (this.editingId !== null) {
         await this.update()
       } else {
         await this.register()
@@ -533,10 +554,12 @@ export default {
       this.access_type = provider.accessType ?? provider.access_type ?? ''
       this.auth_endpoint = provider.authEndpoint ?? provider.auth_endpoint ?? ''
       this.client_id = provider.clientId ?? provider.client_id ?? ''
-      this.client_secret = provider.clientSecret ?? provider.client_secret ?? ''
+      this.client_secret = ''
       this.display = provider.display ?? ''
+      this.hasClientSecret = provider.hasClientSecret ?? false
       this.hd = provider.hd ?? ''
       this.include_granted_scopes = provider.includeGrantedScopes ?? provider.include_granted_scopes ?? ''
+      this.issuer = provider.issuer ?? ''
       this.name = provider.name ?? ''
       this.prompt = provider.prompt ?? ''
       this.response_mode = provider.responseMode ?? provider.response_mode ?? ''
@@ -566,9 +589,8 @@ export default {
       const payload = this.getPayload()
       const res = await axios.post(url, payload)
       if (res.data.status == 'success') {
-        payload.id = res.data.id
-        this.configured.push(payload)
         this.clearForm()
+        await this.populate()
       }
     },
 
@@ -578,11 +600,8 @@ export default {
       payload.id = this.editingId
       const res = await axios.post(url, payload)
       if (res.data.status == 'success') {
-        const index = this.configured.findIndex((item) => item.id === this.editingId)
-        if (index !== -1) {
-          this.configured[index] = payload
-        }
         this.clearForm()
+        await this.populate()
       }
     },
   },

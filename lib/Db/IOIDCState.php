@@ -19,6 +19,12 @@ use OCP\AppFramework\Db\Entity;
  * @method setState($string): void
  * @method getUid(): string
  * @method setUid($string): void
+ * @method getNonceHash(): string
+ * @method setNonceHash(string $nonceHash): void
+ * @method getCreatedAt(): int
+ * @method setCreatedAt(int $createdAt): void
+ * @method getProviderVersion(): int
+ * @method setProviderVersion(int $providerVersion): void
  */
 
 class IOIDCState extends Entity implements JsonSerializable
@@ -35,10 +41,18 @@ class IOIDCState extends Entity implements JsonSerializable
      * @var string $state
      */
     protected $state;
+    /** @var string */
+    protected $nonceHash;
+    /** @var int */
+    protected $createdAt;
+    /** @var int */
+    protected $providerVersion;
 
     public function __construct()
     {
         $this->addType('id', 'integer');
+        $this->addType('createdAt', 'integer');
+        $this->addType('providerVersion', 'integer');
     }
     /**
      * @param array $params
@@ -49,6 +63,9 @@ class IOIDCState extends Entity implements JsonSerializable
         $this->setState($params['state']);
         $this->setProviderId($params['providerId']);
         $this->setUid($params['uid']);
+        $this->setNonceHash($params['nonceHash']);
+        $this->setCreatedAt($params['createdAt']);
+        $this->setProviderVersion($params['providerVersion']);
 
         return $this;
     }
@@ -60,6 +77,8 @@ class IOIDCState extends Entity implements JsonSerializable
             'providerId' => $this->getProviderId(),
             'state' => $this->getState(),
             'uid' => $this->getUid(),
+            'createdAt' => $this->getCreatedAt(),
+            'providerVersion' => $this->getProviderVersion(),
         ];
     }
 }

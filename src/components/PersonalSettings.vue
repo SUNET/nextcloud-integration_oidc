@@ -11,8 +11,9 @@
 						v-for="i in unconfigured"
 						:id="i.id"
 						:key="i.id"
-						:disabled="false"
+						:disabled="!i.issuer"
 						:readonly="readonly"
+						:title="i.issuer ? undefined : 'Provider is missing an issuer'"
 						:wide="true"
 						nativeType="submit"
 						:text="i.name"
@@ -44,7 +45,6 @@
 </template>
 
 <script>
-import { getCurrentUser } from '@nextcloud/auth'
 // Nextcloud API
 import axios from '@nextcloud/axios'
 import { generateUrl, getBaseUrl } from '@nextcloud/router'
@@ -94,79 +94,82 @@ export default {
       let url = generateUrl('/apps/integration_oidc/query')
       let result = await axios.get(url)
       this.available = result.data
-      console.log('available', this.available)
       url = generateUrl('/apps/integration_oidc/query_user')
       result = await axios.get(url)
       // The configured providers for this user
       this.configured = result.data
-      console.log('configured', this.configured)
-      if (this.configured.length === 0) {
-        this.unconfigured = this.available
-      } else {
-        // All the available not in configured
-        this.unconfigured = this.available.filter((a) => this.configured.every((c) => c.provider_id !== a.id))
-        console.log('unconfigured', this.unconfigured)
-      }
+      const activeProviderIds = this.configured
+        .filter((connection) => !connection.requires_reauthorization)
+        .map((connection) => connection.provider_id)
+      this.unconfigured = this.available.filter((provider) => !activeProviderIds.includes(provider.id))
     },
 
     async remove(id) {
       const url = generateUrl('/apps/integration_oidc/remove_user')
-      const params = { id }
-      const result = await axios.post(url, params)
-      if (result.data.status == 'success') {
-        const removed = this.configured.find((a) => a.id == id)
-        console.log('removed', removed)
-        this.configured = this.configured.filter((a) => a.id !== id)
-        this.unconfigured.push(removed)
+      try {
+        const result = await axios.post(url, { id })
+        if (result.data.status == 'success') {
+          await this.private_load()
+        }
+      } catch (error) {
+        const response = error.response?.data
+        if (!response?.canForce) {
+          throw error
+        }
+
+        const message = 'The provider could not confirm remote token revocation. Remove the local connection anyway?'
+        const confirmed = window.confirm(message)
+        if (confirmed) {
+          const result = await axios.post(url, { id, force: true })
+          if (result.data.status == 'success') {
+            await this.private_load()
+          }
+        }
       }
     },
 
     async register(provider_id) {
       const provider = this.available.find((a) => a.id == provider_id)
-      console.log('configured', this.configured)
-      console.log('provider', provider, 'with id', provider_id)
-      const user = getCurrentUser()
+      if (!provider?.issuer) {
+        return
+      }
 
-      const state = self.crypto.randomUUID()
-      const nonce = self.crypto.randomUUID()
+      const url = generateUrl('/apps/integration_oidc/register_state')
+      const result = await axios.post(url, { providerId: provider_id })
+      if (result.data.status != 'success' || !result.data.state || !result.data.nonce) {
+        return
+      }
 
       const client_config = {
         access_type: provider.accessType,
         client_id: provider.clientId,
         include_granted_scopes:
-          provider.include_granted_scopes?.toLowerCase?.() === 'true',
+          provider.includeGrantedScopes?.toLowerCase?.() === 'true',
 
-        nonce,
+        nonce: result.data.nonce,
         prompt: provider.prompt,
         redirect_uri:
           getBaseUrl() + '/index.php/apps/integration_oidc/callback',
 
-        response_type: provider.responseType || 'code',
+        response_type: 'code',
         scope: provider.scope,
-        state,
+        state: result.data.state,
       }
       const form = document.createElement('form')
       form.setAttribute('method', 'GET') // Send as a GET request.
       form.setAttribute('action', provider.authEndpoint)
 
-      const url = generateUrl('/apps/integration_oidc/register_state')
-      const params = { providerId: provider_id, state, uid: user.uid }
-      const result = await axios.post(url, params)
-      if (result.data.status == 'success') {
-        // Add form parameters as hidden input values.
-        for (const c in client_config) {
-          console.log(c, client_config[c])
-          const input = document.createElement('input')
-          input.setAttribute('type', 'hidden')
-          input.setAttribute('name', c)
-          input.setAttribute('value', client_config[c])
-          form.appendChild(input)
-        }
-        console.log('form', form)
-
-        document.body.appendChild(form)
-        form.submit()
+      // Add form parameters as hidden input values.
+      for (const c in client_config) {
+        const input = document.createElement('input')
+        input.setAttribute('type', 'hidden')
+        input.setAttribute('name', c)
+        input.setAttribute('value', client_config[c])
+        form.appendChild(input)
       }
+
+      document.body.appendChild(form)
+      form.submit()
     },
   },
 }

@@ -1,6 +1,6 @@
 {
   "name": "integration_ioidc",
-  "version": "0.1.6",
+  "version": "0.1.11",
   "description": "Integration OIDC",
   "author": "Micke Nordin <kano@sunet.se>",
   "homepage": "https://github.com/sunet/nextcloud-integration_ioidc",
@@ -11,7 +11,7 @@
     "type": "git",
     "url": "https://github.com/sunet/nextcloud-integration_ioidc"
   },
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-or-later",
   "main": "index.js",
   "directories": {
     "test": "tests"

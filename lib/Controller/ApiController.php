@@ -1,221 +1,343 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * SPDX-FileCopyrightText: 2026 Micke Nordin <kano@sunet.se>
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 namespace OCA\IOIDC\Controller;
 
-use OCA\IOIDC\Db\IOIDCUserMapper;
+use OCA\IOIDC\Db\IOIDCProvider;
 use OCA\IOIDC\Db\IOIDCProviderMapper;
 use OCA\IOIDC\Db\IOIDCStateMapper;
-use OCP\IURLGenerator;
+use OCA\IOIDC\Db\IOIDCUserMapper;
+use OCA\IOIDC\Service\OidcClient;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\IRequest;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
-use Psr\Log\LoggerInterface;
+use OCP\IURLGenerator;
 use OCP\IUserSession;
+use Psr\Log\LoggerInterface;
+use Throwable;
+use UnexpectedValueException;
 
 class ApiController extends Controller
 {
     private string $userId;
-    private IURLGenerator $urlGenerator;
-    private IOIDCUserMapper $ioidcUserMapper;
-    private IOIDCProviderMapper $ioidcProviderMapper;
-    private IOIDCStateMapper $ioidcStateMapper;
-    private Client $client;
-    private LoggerInterface $logger;
+
     public function __construct(
         string $appName,
         IRequest $request,
-        IURLGenerator $urlGenerator,
-        IOIDCUserMapper $ioidcUserMapper,
-        IOIDCProviderMapper $ioidcProviderMapper,
-        IOIDCStateMapper $ioidcStateMapper,
+        private IURLGenerator $urlGenerator,
+        private IOIDCUserMapper $ioidcUserMapper,
+        private IOIDCProviderMapper $ioidcProviderMapper,
+        private IOIDCStateMapper $ioidcStateMapper,
         IUserSession $userSession,
-        LoggerInterface $logger
+        private LoggerInterface $logger,
+        private OidcClient $oidcClient,
     ) {
         parent::__construct($appName, $request);
-        $this->ioidcUserMapper = $ioidcUserMapper;
-        $this->ioidcProviderMapper = $ioidcProviderMapper;
-        $this->ioidcStateMapper = $ioidcStateMapper;
-        $this->logger = $logger;
-        $this->urlGenerator = $urlGenerator;
-        $this->client = new Client();
-        $this->userId = $userSession->getUser()->getUID();
+        $this->userId = $userSession->getUser()?->getUID() ?? '';
     }
+
     /**
      * @NoCSRFRequired
      * @NoAdminRequired
-     * @return RedirectResponse
-     **/
+     */
     public function callback(): RedirectResponse
     {
-        $params = $this->request->getParams();
-        $code = $params['code'];
-        $state = $params['state'];
-        $result = $this->ioidcStateMapper->query_state($this->userId, $state);
-
-        $provider_id = $result['provider_id'];
-        $client_id = $result['client_id'];
-        $client_secret = $result['client_secret'];
-        $token_endpoint = $result['token_endpoint'];
-
-        $redirect_uri = $this->urlGenerator->getAbsoluteURL('/index.php/apps/integration_oidc/callback');
-
         $url = $this->urlGenerator->getAbsoluteURL('/index.php/settings/user/connected-accounts');
+        $providerId = null;
 
-        $provider = $this->ioidcProviderMapper->get($provider_id);
-        $this->logger->debug('provider: ' . print_r($provider, true));
-
-        $payload = ['form_params' => [
-            'client_id' => $client_id,
-            'client_secret' => $client_secret,
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => $redirect_uri,
-            'scope' => $provider->getScope(),
-        ]];
         try {
-            $response = $this->client->post(
-                $token_endpoint,
-                $payload
-            );
-        } catch (GuzzleException $e) {
-            $this->logger->error('Token exchange failed for provider ' . $provider_id . ': ' . $e->getMessage());
-            return new RedirectResponse($url);
+            $params = $this->request->getParams();
+            $state = $this->requestString($params, 'state');
+            $transaction = $this->ioidcStateMapper->consume_state($this->userId, $state, time());
+            $providerId = (int)$transaction['provider_id'];
+            if (isset($params['error'])) {
+                throw new UnexpectedValueException('Provider returned an authorization error');
+            }
+            $code = $this->requestString($params, 'code');
+
+            $redirectUri = $this->urlGenerator->getAbsoluteURL('/index.php/apps/integration_oidc/callback');
+            $token = $this->oidcClient->exchangeAuthorizationCode($transaction, $code, $redirectUri);
+            $idToken = $token['id_token'];
+            if (!is_string($idToken)) {
+                throw new UnexpectedValueException('Token response did not contain an ID token');
+            }
+            $claims = $this->oidcClient->validateIdToken($idToken, $transaction, (string)$transaction['nonce_hash']);
+
+            $refreshToken = $token['refresh_token'];
+            if (!is_string($refreshToken) || $refreshToken === '') {
+                throw new UnexpectedValueException('Token response did not contain a refresh token');
+            }
+
+            $this->ioidcUserMapper->register_user([
+                'accessToken' => $token['access_token'],
+                'email' => is_string($claims->email ?? null) ? $claims->email : null,
+                'expiresIn' => $token['expires_in'],
+                'providerId' => $providerId,
+                'providerVersion' => (int)$transaction['config_version'],
+                'refreshToken' => $refreshToken,
+                'scope' => $token['scope'] !== '' ? $token['scope'] : (string)$transaction['scope'],
+                'sub' => $claims->sub,
+                'tokenType' => $token['token_type'],
+                'timestamp' => time(),
+                'uid' => $this->userId,
+            ]);
+        } catch (Throwable $e) {
+            $this->logger->warning('OIDC callback rejected', [
+                'providerId' => $providerId,
+                'reason' => $e::class,
+            ]);
         }
-        $body = json_decode($response->getBody()->getContents());
-        $this->logger->debug('body: ' . print_r($body, true));
-        $access_token = $body->access_token;
-        $expires_in = $body->expires_in;
-        $refresh_token = $body->refresh_token;
-        $scope = $body->scope ?? '';
-        $token_type = $body->token_type;
-        $id_token = $body->id_token;
 
-        // --- JWT decoding ---
-        $jwt_parts = explode('.', $id_token);
-        if (count($jwt_parts) !== 3) {
-            throw new \RuntimeException('Malformed ID token');
-        }
-
-        $payload = $jwt_parts[1];
-        $payload .= str_repeat('=', (4 - strlen($payload) % 4) % 4); // fix padding
-        $payload = strtr($payload, '-_', '+/');
-
-        $id_obj = json_decode(base64_decode($payload));
-        if (!$id_obj) {
-            throw new \RuntimeException('Failed to decode ID token payload');
-        }
-
-        $email = $id_obj->email ?? null;
-        $sub = $id_obj->sub ?? null;
-
-        if (!$sub) {
-            throw new \RuntimeException('Missing "sub" claim in ID token');
-        }
-
-        $this->ioidcUserMapper->register_user([
-            'accessToken' => $access_token,
-            'email' => $email,
-            'expiresIn' => $expires_in,
-            'providerId' => $provider_id,
-            'refreshToken' => $refresh_token,
-            'scope' => $scope,
-            'sub' => $sub,
-            'tokenType' => $token_type,
-            'timestamp' => time(),
-            'uid' => $this->userId
-        ]);
-
-        return new RedirectResponse($url, Http::STATUS_OK);
+        return new RedirectResponse($url);
     }
+
     /**
      * @NoAdminRequired
-     * @return DataResponse
-     **/
+     */
     public function query(): DataResponse
     {
-        $response = $this->ioidcProviderMapper->query();
-        return new DataResponse($response, Http::STATUS_OK);
+        return new DataResponse($this->ioidcProviderMapper->query(), Http::STATUS_OK);
     }
+
     /**
      * @NoAdminRequired
-     * @return DataResponse
-     **/
+     */
     public function queryUser(): DataResponse
     {
-        $response = $this->ioidcUserMapper->query_user($this->userId);
+        $response = [];
+        foreach ($this->ioidcUserMapper->query_user($this->userId) as $row) {
+            $response[] = [
+                'id' => (int)$row['id'],
+                'provider_id' => (int)$row['provider_id'],
+                'name' => (string)$row['name'],
+                'requires_reauthorization' => (bool)($row['requires_reauthorization'] ?? false),
+                'archived' => (bool)($row['archived'] ?? false),
+            ];
+        }
+
         return new DataResponse($response, Http::STATUS_OK);
     }
-    /**
-     * @return DataResponse
-     **/
+
     public function register(): DataResponse
     {
-        $params = $this->request->getParams();
-        $id = $this->ioidcProviderMapper->register($params);
-        $response = ['status' => "success", "id" => $id];
-        return new DataResponse($response, Http::STATUS_OK);
+        try {
+            $params = $this->prepareProviderParams($this->request->getParams(), false);
+            $id = $this->ioidcProviderMapper->register($params);
+
+            return new DataResponse(['status' => 'success', 'id' => $id], Http::STATUS_OK);
+        } catch (Throwable $e) {
+            $this->logger->warning('OIDC provider registration rejected', ['reason' => $e::class]);
+
+            return new DataResponse(['status' => 'error'], Http::STATUS_BAD_REQUEST);
+        }
     }
-    /**
-     * @return DataResponse
-     **/
+
     public function update(): DataResponse
     {
-        $params = $this->request->getParams();
-        $entity = $this->ioidcProviderMapper->get($params['id']);
-        $entity->setParams($params);
-        $this->ioidcProviderMapper->update($entity);
-        return new DataResponse(['status' => "success"], Http::STATUS_OK);
+        try {
+            $params = $this->request->getParams();
+            $id = filter_var($params['id'] ?? null, FILTER_VALIDATE_INT);
+            if ($id === false || $id < 1) {
+                throw new UnexpectedValueException('Provider ID is invalid');
+            }
+            $entity = $this->ioidcProviderMapper->get($id);
+            $params = $this->prepareProviderParams($params, true);
+            if ($this->hasSecuritySensitiveChanges($entity, $params)) {
+                $entity->setConfigVersion(max(1, (int)$entity->getConfigVersion()) + 1);
+            }
+            $entity->setParams($params, true);
+            $this->ioidcProviderMapper->update($entity);
+
+            return new DataResponse(['status' => 'success'], Http::STATUS_OK);
+        } catch (Throwable $e) {
+            $this->logger->warning('OIDC provider update rejected', ['reason' => $e::class]);
+
+            return new DataResponse(['status' => 'error'], Http::STATUS_BAD_REQUEST);
+        }
     }
+
     /**
      * @NoAdminRequired
-     * @return DataResponse
-     **/
+     */
     public function registerState(): DataResponse
     {
-        $params = $this->request->getParams();
-        $id = $this->ioidcStateMapper->register_state($params);
-        $status = ['status' => "success", "id" => $id];
-        $response = array_merge($status, $params);
-        return new DataResponse($response, Http::STATUS_OK);
+        try {
+            $params = $this->request->getParams();
+            $providerId = filter_var($params['providerId'] ?? null, FILTER_VALIDATE_INT);
+            if ($providerId === false || $providerId < 1) {
+                throw new UnexpectedValueException('Provider ID is invalid');
+            }
+
+            $provider = $this->ioidcProviderMapper->get($providerId);
+            $issuer = $provider->getIssuer();
+            $jwksUri = $provider->getJwksUri();
+            if (!is_string($issuer) || $issuer === '' || !is_string($jwksUri) || $jwksUri === '') {
+                throw new UnexpectedValueException('Provider requires administrator reconfiguration');
+            }
+
+            $state = $this->randomBase64Url(32);
+            $nonce = $this->randomBase64Url(32);
+            $id = $this->ioidcStateMapper->register_state([
+                'providerId' => $providerId,
+                'providerVersion' => max(1, (int)$provider->getConfigVersion()),
+                'state' => hash('sha256', $state),
+                'nonceHash' => hash('sha256', $nonce),
+                'createdAt' => time(),
+                'uid' => $this->userId,
+            ]);
+
+            return new DataResponse([
+                'status' => 'success',
+                'id' => $id,
+                'state' => $state,
+                'nonce' => $nonce,
+            ], Http::STATUS_OK);
+        } catch (Throwable $e) {
+            $this->logger->warning('OIDC transaction creation rejected', ['reason' => $e::class]);
+
+            return new DataResponse(['status' => 'error'], Http::STATUS_BAD_REQUEST);
+        }
     }
-    /**
-     * @return DataResponse
-     **/
+
     public function remove(): DataResponse
     {
         $params = $this->request->getParams();
-        $entity = $this->ioidcProviderMapper->get($params['id']);
+        $id = filter_var($params['id'] ?? null, FILTER_VALIDATE_INT);
+        if ($id === false || $id < 1) {
+            return new DataResponse(['status' => 'error'], Http::STATUS_BAD_REQUEST);
+        }
+        if ($this->ioidcUserMapper->has_provider_connections($id)) {
+            return new DataResponse(['status' => 'error', 'reason' => 'provider_in_use'], Http::STATUS_CONFLICT);
+        }
+        $entity = $this->ioidcProviderMapper->get($id);
         $this->ioidcProviderMapper->delete($entity);
-        return new DataResponse(['status' => "success"], Http::STATUS_OK);
+
+        return new DataResponse(['status' => 'success'], Http::STATUS_OK);
     }
+
     /**
      * @NoAdminRequired
-     * @return DataResponse
-     **/
+     */
     public function removeUser(): DataResponse
     {
         $params = $this->request->getParams();
-        $response = $this->ioidcUserMapper->get_refresh_token($params['id']);
-        if (!$response) {
-            return new DataResponse(['status' => "error"], Http::STATUS_BAD_REQUEST);
+        $id = filter_var($params['id'] ?? null, FILTER_VALIDATE_INT);
+        if ($id === false || $id < 1) {
+            return new DataResponse(['status' => 'error'], Http::STATUS_BAD_REQUEST);
         }
-        $this->client->post(
-            $response['revoke_endpoint'],
-            [
-                'form_params' => [
-                    'token' => $response['refresh_token'],
-                    'grant_type' => 'refresh_token',
-                    'code' => $response['code']
-                ]
-            ]
-        );
-        $state = array('uid' => $this->userId, 'provider_id' => $response['provider_id']);
-        $this->ioidcUserMapper->delete_user($params['id']);
-        $this->ioidcStateMapper->delete_userstate($state);
-        return new DataResponse(['status' => "success"], Http::STATUS_OK);
+
+        $provider = $this->ioidcUserMapper->get_refresh_token($id, $this->userId);
+        if ($provider === []) {
+            return new DataResponse(['status' => 'error'], Http::STATUS_BAD_REQUEST);
+        }
+
+        $force = filter_var($params['force'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $remoteRevocation = 'not_supported';
+        if ((int)$provider['provider_version'] !== (int)$provider['config_version']) {
+            $remoteRevocation = 'skipped_provider_changed';
+            if (!$force) {
+                return new DataResponse([
+                    'status' => 'error',
+                    'reason' => $remoteRevocation,
+                    'canForce' => true,
+                ], Http::STATUS_CONFLICT);
+            }
+            $this->logger->warning('Remote OIDC token revocation skipped because provider configuration changed', [
+                'providerId' => (int)$provider['provider_id'],
+            ]);
+        } elseif (is_string($provider['revoke_endpoint']) && $provider['revoke_endpoint'] !== '') {
+            try {
+                $this->oidcClient->revokeRefreshToken($provider, (string)$provider['refresh_token']);
+                $remoteRevocation = 'completed';
+            } catch (Throwable $e) {
+                $remoteRevocation = 'failed';
+                $this->logger->warning('Remote OIDC token revocation failed', [
+                    'providerId' => (int)$provider['provider_id'],
+                    'reason' => $e::class,
+                ]);
+                if (!$force) {
+                    return new DataResponse([
+                        'status' => 'error',
+                        'reason' => 'revocation_failed',
+                        'canForce' => true,
+                    ], Http::STATUS_BAD_GATEWAY);
+                }
+            }
+        }
+
+        $this->ioidcUserMapper->delete_user($id, $this->userId);
+        $this->ioidcStateMapper->delete_userstate([
+            'uid' => $this->userId,
+            'provider_id' => (int)$provider['provider_id'],
+        ]);
+
+        return new DataResponse([
+            'status' => 'success',
+            'remoteRevocation' => $remoteRevocation,
+        ], Http::STATUS_OK);
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
+    private function prepareProviderParams(array $params, bool $updating): array
+    {
+        foreach (['client_id', 'name', 'scope'] as $field) {
+            $this->requestString($params, $field);
+        }
+        if (!$updating) {
+            $this->requestString($params, 'client_secret');
+        }
+
+        return $this->oidcClient->discoverProvider($params);
+    }
+
+    /** @param array<string, mixed> $params */
+    private function hasSecuritySensitiveChanges(IOIDCProvider $provider, array $params): bool
+    {
+        $current = [
+            'issuer' => $provider->getIssuer(),
+            'jwks_uri' => $provider->getJwksUri(),
+            'auth_endpoint' => $provider->getAuthEndpoint(),
+            'token_endpoint' => $provider->getTokenEndpoint(),
+            'revoke_endpoint' => $provider->getRevokeEndpoint() ?? '',
+            'client_id' => $provider->getClientId(),
+            'scope' => $provider->getScope(),
+            'token_endpoint_auth_method' => $provider->getTokenEndpointAuthMethod(),
+        ];
+        foreach ($current as $field => $value) {
+            if (($params[$field] ?? null) !== $value) {
+                return true;
+            }
+        }
+
+        return isset($params['client_secret'])
+            && $params['client_secret'] !== ''
+            && $params['client_secret'] !== $provider->getClientSecret();
+    }
+
+    /** @param array<string, mixed> $params */
+    private function requestString(array $params, string $field): string
+    {
+        $value = $params[$field] ?? null;
+        if (!is_string($value) || $value === '') {
+            throw new UnexpectedValueException(sprintf('Request field "%s" is missing', $field));
+        }
+
+        return $value;
+    }
+
+    private function randomBase64Url(int $bytes): string
+    {
+        return rtrim(strtr(base64_encode(random_bytes($bytes)), '+/', '-_'), '=');
     }
 }

@@ -100,6 +100,7 @@ clean:
 	rm -rf $(build_dir)
 
 package: clean build
+	$(MAKE) composer-prod
 	mkdir -p $(sign_dir)
 	rsync -a \
 	--exclude=/build \
@@ -107,6 +108,9 @@ package: clean build
 	--exclude=/translationfiles \
 	--exclude=.tx \
 	--exclude=/tests \
+	--exclude=/node_modules \
+	--exclude=/phpunit.xml \
+	--exclude=/.php-cs-fixer.dist.php \
 	--exclude=.git \
 	--exclude=.github \
 	--exclude=/l10n/l10n.pl \
@@ -150,6 +154,14 @@ ifeq (, $(composer))
 	cd $(project_dir) && php $(build_tools_dir)/composer.phar install --prefer-dist
 else
 	cd $(project_dir) && composer install --prefer-dist
+endif
+
+.PHONY: composer-prod
+composer-prod:
+ifeq (, $(composer))
+	cd $(project_dir) && php $(build_tools_dir)/composer.phar install --no-dev --prefer-dist --optimize-autoloader
+else
+	cd $(project_dir) && composer install --no-dev --prefer-dist --optimize-autoloader
 endif
 
 # Installs npm dependencies
